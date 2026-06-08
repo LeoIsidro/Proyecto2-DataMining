@@ -1,0 +1,20 @@
+# Datasets y archivos pesados
+Yelp-JSON/
+__MACOSX/
+*.tar
+*.zip
+*.tar.gz
+
+# Configuración de habilidades de agentes
+.agents/skills/
+
+# Archivos de entorno y temporales de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+.env
