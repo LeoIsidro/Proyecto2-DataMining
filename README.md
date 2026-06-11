@@ -20,8 +20,10 @@ El código está organizado de manera modular en los siguientes archivos:
   * HITS (Hubs y Authorities).
   * Algoritmo de Louvain para modularidad.
   * Multi-sweep BFS para estimación del diámetro de la red.
+* **[clustering.py](implementaciones/clustering.py):** Módulo para algoritmos de clustering (DBSCAN y CURE) y métricas de evaluación (Silhouette, Purity), programados vectorialmente.
+* **[recommenders.py](implementaciones/recommenders.py):** Sistema de recomendación híbrido que combina Filtrado Colaborativo y Basado en Contenido con cálculo de métricas (Precision, Recall, NDCG, RMSE, MAE).
 * **[preprocessing.py](preprocessing.py):** Módulo para la carga y limpieza eficiente de los datasets de Yelp. Utiliza técnicas de muestreo (*Reservoir Sampling*) para procesar gigabytes de datos en segundos sin agotar la memoria RAM.
-* **[Proyecto2_ParteII_Grafos.ipynb](Proyecto2_ParteII_Grafos.ipynb):** Cuaderno interactivo de Jupyter que guía paso a paso a través de la construcción del grafo, el cálculo de métricas y la interpretación cualitativa de las comunidades y rankings.
+* **[Proyecto2.ipynb](Proyecto2.ipynb):** Cuaderno interactivo de Jupyter que guía paso a paso a través de la construcción del grafo, cálculo de métricas, y ahora incluye secciones iterativas de Clustering (Parte III) y Sistemas de Recomendación (Parte IV).
 * **[run_analysis.py](run_analysis.py):** Módulo de utilidades analíticas que provee las funciones necesarias para calcular métricas comparativas y caracterizar comunidades estructuradamente dentro del cuaderno.
 * **[build_graph.py](build_graph.py):** Script preliminar de prueba para la construcción del grafo y validación de componentes conexas y diámetro.
 
@@ -39,6 +41,20 @@ Define una relación de beneficio mutuo en redes bipartitas:
 
 ### 3. Detección de Comunidades (Louvain)
 Agrupa nodos buscando maximizar la **Modularidad**, una métrica que compara cuántas conexiones internas existen dentro de los grupos frente a lo que ocurriría por puro azar. Funciona en dos fases: asignación óptima de comunidades locales (Fase 1) y colapso del grafo en metanodos para detectar estructuras jerárquicas más grandes (Fase 2).
+
+### 4. Clustering y Segmentación Estratégica
+Se implementaron algoritmos para agrupar usuarios o negocios basándose en su proximidad en un espacio dimensional:
+* **K-Means++:** Partición con inicialización optimizada. Se evalúa el k óptimo a través de la inercia (WCSS) y la silueta.
+* **DBSCAN:** Agrupa áreas de alta densidad y aísla el ruido. Estimación de vecindario vía K-Distance plot.
+* **CURE:** Algoritmo aglomerativo basado en representantes múltiples para lidiar con formas complejas de clusters.
+* **BFR:** Extensión escalable procesada en bloques (DS, CS, RS) que evalúa puntos mediante distancia de Mahalanobis.
+*Evaluado mediante Silhouette, Purity y NMI.*
+
+### 5. Recomendación Escalable e Híbrida
+Un motor que mejora la precisión fusionando múltiples perspectivas, validado contra baselines de Aleatoriedad y Popularidad:
+* **Filtrado Colaborativo:** K-NN ponderado User/Item-Based basado en similitud Coseno y Pearson. Manejo de cold-start.
+* **Basado en Contenido:** Extracción de features (ej. TF-IDF) para mapear perfiles y encontrar similitud vectorial.
+* **Híbrido:** Combinación ponderada (weighted average) evaluada por Precision@K, Recall@K, NDCG, RMSE y MAE.
 
 ---
 
