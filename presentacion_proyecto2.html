@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto 2 — Data Mining Yelp</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+
+  :root {
+    --ink:     #0d0f1a;
+    --paper:   #f4f3f8;
+    --violet:  #7F77DD;
+    --emerald: #1D9E75;
+    --coral:   #D85A30;
+    --blue:    #3F6FAE;
+    --mid:     #6b6d8a;
+    --grid:    #e0dff0;
+    --card-bg: #ffffff;
+    --code-bg: #1a1b2e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  html, body { 
+    width: 100%; height: 100%; 
+    overflow: hidden; 
+    font-family: 'Space Grotesk', sans-serif; 
+    background: var(--paper); color: var(--ink); 
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 1vh 3vw;
+    background: rgba(244,243,248,0.1); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  nav.dark-mode { background: rgba(13,15,26,0.3); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .nav-logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--violet); letter-spacing: .1em; }
+  .nav-links { display: flex; gap: 2rem; margin-left: auto; }
+  .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--mid); text-decoration: none; letter-spacing: .04em; transition: color .2s; cursor: pointer;}
+  .nav-links a:hover, .nav-links a.active { color: var(--violet); font-weight: 700; }
+
+  /* SLIDER CONTAINER */
+  #slider { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.86, 0, 0.07, 1); }
+
+  /* SLIDES */
+  section { 
+    width: 100vw; height: 100vh;
+    padding: 7vh 0 3vh; 
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative; overflow: hidden; 
+  }
+  
+  .container { 
+    max-width: 1500px; width: 92%; 
+    height: 100%;
+    margin: 0 auto; 
+    display: flex; flex-direction: column; justify-content: center; 
+  }
+
+  /* HERO */
+  #hero { background: linear-gradient(155deg, #1a1b2e 0%, #0f1528 55%, #0a0c1a 100%); align-items: center; padding: 0 2rem; }
+  #hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 40% at 20% 65%, rgba(127,119,221,.18) 0%, transparent 70%), radial-gradient(ellipse 45% 50% at 80% 30%, rgba(216,90,48,.11) 0%, transparent 70%); }
+  .hero-tag { font-family: 'JetBrains Mono', monospace; font-size: 1rem; letter-spacing: .15em; color: var(--violet); border: 1px solid rgba(127,119,221,.4); padding: .5rem 1.2rem; border-radius: 999px; margin-bottom: 2rem; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3.5rem, 7vw, 6.5rem); font-weight: 700; color: #fff; line-height: 1.05; text-align: center; }
+  .hero-title em { font-style: italic; color: var(--violet); }
+  .hero-sub { font-size: 1.3rem; color: rgba(255,255,255,.5); text-align: center; max-width: 800px; margin-top: 1.5rem; line-height: 1.65; }
+  .nav-hint { position: absolute; bottom: 2.5rem; display: flex; align-items: center; gap: .8rem; color: rgba(255,255,255,.3); font-size: .85rem; letter-spacing: .08em; width:100%; justify-content: center; }
+  .key { border: 1px solid rgba(255,255,255,.2); border-radius: 4px; padding: 3px 10px; font-family: 'JetBrains Mono'; color: rgba(255,255,255,.5); background: rgba(0,0,0,.2); }
+  .slide-count { position: absolute; right: 2.5rem; bottom: 2.5rem; font-family: 'JetBrains Mono'; font-size: .9rem; color: var(--mid); font-weight: 600;}
+  .dark-section .slide-count { color: rgba(255,255,255,.3); }
+
+  /* TYPOGRAPHY */
+  .header-block { margin-bottom: 2vh; flex-shrink: 0; }
+  .section-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: .8rem; letter-spacing: .16em; font-weight: 600; color: var(--violet); text-transform: uppercase; margin-bottom: .3rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; }
+  .section-lead { font-size: 1.2rem; color: var(--mid); line-height: 1.6; max-width: 1100px; }
+
+  /* DARK SECTION */
+  .dark-section { background: #0d0f1a; }
+  .dark-section .section-title { color: #fff; }
+  .dark-section .section-lead { color: rgba(255,255,255,.5); }
+  .dark-section .section-eyebrow { color: var(--emerald); }
+
+  /* CONTENT WRAPPER */
+  .content-body { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+
+  /* LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3vw; align-items: stretch; height: 100%; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2vw; align-items: stretch; height: 100%; }
+  
+  .col-text { display: flex; flex-direction: column; justify-content: center; }
+  .col-visual { display: flex; flex-direction: column; justify-content: center; gap: 1rem; height: 100%; }
+
+  /* CARDS */
+  .card { background: var(--card-bg); border: 1px solid var(--grid); border-radius: 12px; padding: 2rem; border-top: 4px solid var(--violet); display:flex; flex-direction:column; justify-content:center;}
+  .card.e { border-top-color: var(--emerald); }
+  .card.c { border-top-color: var(--coral); }
+  .card.b { border-top-color: var(--blue); }
+  .dark-section .card { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.07); }
+  
+  .card-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; color: var(--ink); line-height: 1.3;}
+  .card-desc { font-size: 1.1rem; color: var(--mid); line-height: 1.6; }
+  .dark-section .card-title { color: #fff; }
+  .dark-section .card-desc { color: rgba(255,255,255,.6); }
+
+  /* LISTS */
+  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 2vh; }
+  .feature-item { display: flex; gap: 1.2rem; align-items: flex-start; }
+  .f-icon { font-size: 2rem; line-height: 1; margin-top: .2rem; }
+  .f-text h4 { font-size: 1.25rem; color: var(--ink); margin-bottom: .4rem; }
+  .f-text p { font-size: 1.05rem; color: var(--mid); line-height: 1.5; }
+  .dark-section .f-text h4 { color: #fff; }
+  .dark-section .f-text p { color: rgba(255,255,255,.5); }
+
+  /* IMAGES & PLACEHOLDERS */
+  .graph-img { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; }
+
+  /* HIGHLIGHT PILL */
+  .highlight-box { background: rgba(127,119,221,.1); border-left: 6px solid var(--violet); padding: 1.5rem 2rem; border-radius: 0 12px 12px 0; margin-bottom: 2vh; font-size: 1.2rem; color: var(--ink); line-height: 1.6; }
+  .dark-section .highlight-box { background: rgba(127,119,221,.15); color: #fff; }
+  
+  .terminal-box { font-family: 'JetBrains Mono', monospace; background: var(--code-bg); padding: 1.5rem; border-radius: 12px; color: #a9b7c6; font-size: 1.05rem; line-height: 1.5; white-space: pre-wrap; border: 1px solid rgba(255,255,255,.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);}
+  .terminal-box .green { color: #629755; }
+  .terminal-box .blue { color: #6897bb; }
+  .terminal-box .yellow { color: #cc7832; }
+
+  /* ANIMATIONS */
+  .slide-content { opacity: 0; transform: translateY(40px); transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s; height: 100%; display: flex; flex-direction: column;}
+  section.active .slide-content { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar" class="dark-mode">
+  <span class="nav-logo">DM // Proyecto 2</span>
+  <div class="nav-links">
+    <a onclick="goToSlide(0)" id="link-0" class="active">Inicio</a>
+    <a onclick="goToSlide(1)" id="link-1">Parte I</a>
+    <a onclick="goToSlide(7)" id="link-7">Parte II</a>
+    <a onclick="goToSlide(12)" id="link-12">Parte IV</a>
+  </div>
+</nav>
+
+<div id="slider">
+  
+  <!-- ======================== SLIDE 0 ======================== -->
+  <section id="hero" data-theme="dark">
+    <div class="container slide-content" style="align-items:center;">
+      <div class="hero-tag">Minería Masiva · Grafos · Recomendadores</div>
+      <h1 class="hero-title">Proyecto Yelp:<br><em>Del Caos al Conocimiento</em></h1>
+      <p class="hero-sub">Exposición técnica de las metodologías aplicadas y los hallazgos estructurales descubiertos en el ecosistema de Yelp, integrando análisis de redes y filtrado colaborativo.</p>
+    </div>
+    <div class="nav-hint">Usa las flechas <span class="key">↓</span> <span class="key">↑</span> del teclado para navegar</div>
+  </section>
+
+  <!-- ======================== PARTE 1 - SLIDE 1 ======================== -->
+  <section data-theme="light">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow">01 — Parte I: Preprocesamiento</p>
+        <h2 class="section-title">EDA y Reservoir Sampling</h2>
+        <p class="section-lead">Procesar el archivo original JSON de Yelp (más de 5GB y ~7 millones de reseñas) ocasionaba el colapso de la memoria RAM. Para el Análisis Exploratorio (EDA) inicial, la muestra aleatoria fue nuestra solución.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-text">
+            <ul class="feature-list">
+              <li class="feature-item">
+                <div class="f-icon">💧</div>
+                <div class="f-text">
+                  <h4>Técnica: Reservoir Sampling</h4>
+                  <p>Iteramos el flujo masivo reteniendo una muestra estocásticamente perfecta (100,000 reseñas), sin necesidad de saber el tamaño total del dataset ni sobrecargar la librería Pandas en memoria.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">📉</div>
+                <div class="f-text">
+                  <h4>Hallazgo: La Ley de Potencias</h4>
+                  <p>El primer gran descubrimiento fue que la red sigue una intensa distribución "Power Law". La inmensa mayoría de los usuarios escribe solo 1 reseña, revelando que el ecosistema es muy desigual.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-visual">
+            <img src="p2/parte1_2.png" class="graph-img" style="border: 1px solid var(--grid); background:white;" alt="Histograma de Frecuencias">
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">1 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 1 - SLIDE 2 ======================== -->
+  <section class="dark-section" data-theme="dark">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow">01 — Parte I: Preprocesamiento</p>
+        <h2 class="section-title">Distribución de Calificaciones (Stars)</h2>
+        <p class="section-lead">Al extraer métricas y graficar la distribución de las estrellas otorgadas en la muestra, observamos claros sesgos de comportamiento humano en la plataforma Yelp.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-visual">
+            <img src="p2/parte1_1.png" class="graph-img" style="border: 1px solid var(--grid); background:white;" alt="Distribución de Estrellas">
+          </div>
+          <div class="col-text">
+            <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
+              <div class="card-title">Sesgo Positivo y Extremos</div>
+              <div class="card-desc">Los datos muestran que la mayoría de los usuarios de Yelp tienden a ser benevolentes, dominando ampliamente las reseñas de 4 y 5 estrellas. A su vez, las reseñas de 1 estrella son mucho más comunes que las neutrales (2 y 3), revelando que la gente comenta principalmente cuando la experiencia es excelente o terrible.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">2 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 1 - SLIDE 3 ======================== -->
+  <section data-theme="light">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow">01 — Parte I: Preprocesamiento</p>
+        <h2 class="section-title">Perfil Comercial: Top Categorías</h2>
+        <p class="section-lead">Yelp abarca miles de tipos de negocio, pero nuestro EDA reveló que la red está dominada por un ecosistema altamente gastronómico y de vida nocturna.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-text">
+            <ul class="feature-list">
+              <li class="feature-item">
+                <div class="f-icon">🍔</div>
+                <div class="f-text">
+                  <h4>Hallazgo: Hegemonía Gastronómica</h4>
+                  <p>Categorías como "Restaurants", "Food" y "Nightlife" aplastan completamente al resto. Yelp es, fundamentalmente, una plataforma de experiencias culinarias antes que una red de servicios generales.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">🖇️</div>
+                <div class="f-text">
+                  <h4>Correlación Volumen-Calidad</h4>
+                  <p>Al cruzar el volumen de reseñas con el rating, observamos un patrón triangular: los restaurantes con miles de reseñas tienden a estabilizarse en un sólido 4 estrellas, erradicando los extremos engañosos (5 puros o 1 puro).</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-visual">
+            <img src="p2/parte1_3.png" class="graph-img" style="border: 1px solid var(--grid); background:white;" alt="Top Categorías">
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">3 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 1 - SLIDE 4 ======================== -->
+  <section class="dark-section" data-theme="dark">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow">01 — Parte I: Preprocesamiento</p>
+        <h2 class="section-title">Análisis de Segmentos Geográficos</h2>
+        <p class="section-lead">El conjunto de datos académicos de Yelp no engloba todo EE.UU. uniformemente. Descubrir la distribución espacial es clave para el análisis futuro de grafos.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-visual">
+            <img src="p2/parte1_5.png" class="graph-img" style="border: 1px solid var(--grid); background:white;" alt="Análisis Geográfico">
+          </div>
+          <div class="col-text">
+            <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
+              <div class="card-title">Polos de Concentración</div>
+              <div class="card-desc">El análisis de estados reveló focos de datos predominantes como Pensilvania (PA) o Florida (FL). Esto sugiere clústeres naturales inquebrantables, pues en la vida real, los usuarios no cruzan el país para ir a cenar, lo que forma subgrafos geográficos latentes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">4 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 1 - SLIDE 5 ======================== -->
+  <section data-theme="light">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow">01 — Parte I: Preprocesamiento</p>
+        <h2 class="section-title">Streaming Iterativo y Método del Codo</h2>
+        <p class="section-lead">Para descubrir el filtro de "k-core" óptimo, no podíamos usar una muestra. Computamos el grado de los millones de nodos iterando línea por línea la base de datos completa de 5GB en crudo.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-text">
+            <ul class="feature-list">
+              <li class="feature-item">
+                <div class="f-icon">⚡</div>
+                <div class="f-text">
+                  <h4>Técnica: Hash Iterativo O(1)</h4>
+                  <p>Se utilizaron diccionarios `defaultdict` en Python para acumular los conteos al vuelo, procesando todo el inmenso archivo en segundos sin agotar la RAM.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">📏</div>
+                <div class="f-text">
+                  <h4>Técnica: Distancia Ortogonal</h4>
+                  <p>Al trazar la retención vs umbral K, medimos la distancia máxima ortogonal a la secante para hallar matemáticamente el "Codo" de la curva.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">💡</div>
+                <div class="f-text">
+                  <h4>Hallazgo: k=3 retiene lo óptimo</h4>
+                  <p>La matemática demostró que en k=3 se desecha el ruido inerte limitando la pérdida de reseñas totales.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-visual">
+            <img src="p2/parte1_6.png" class="graph-img" style="border: 1px solid var(--grid); background:white;" alt="Codo K-core">
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">5 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 1 - SLIDE 6 ======================== -->
+  <section class="dark-section" data-theme="dark">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow">01 — Parte I: Preprocesamiento</p>
+        <h2 class="section-title">Grafo 10-core y la Componente Gigante</h2>
+        <p class="section-lead">Contrariando el sugerido matemático (k=3), la decisión técnica basada en el "State of the Art" de recomendadores dictaminó imponer un filtro riguroso de <strong>10-core</strong>.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="highlight-box">
+          "Un usuario que retiene solo 3 reseñas carece de historia suficiente para calcular similitudes fiables frente a otros, perpetuando de forma irreversible el temido <strong>Cold Start</strong> en Recomendadores."
+        </div>
+        <div class="grid-2">
+          <div class="col-text">
+            <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
+              <div class="card-title">Construcción Bipartita Extrema</div>
+              <div class="card-desc">Al forzar un subgrafo 10-core, la matriz perdió millones de filas basura. Todo usuario restante es un "Heavy User", garantizando fluidez perfecta para modelos matemáticos.</div>
+            </div>
+          </div>
+          <div class="col-visual">
+             <div class="card c" style="background:transparent; border:none; border-top: 4px solid var(--coral); padding: 1.5rem 0; margin-top: 1rem;">
+              <div class="card-title">Cálculo de Componentes Conexas</div>
+              <div class="card-desc">Ejecutamos algoritmos de detección topológica y encontramos la "Componente Gigante" (Gcc) que engloba a la inmensa mayoría de la red. Estimamos su diámetro con barridos (sweeps) demostrando un mundo interconectado y de alcance pequeño.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">6 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 2 - SLIDE 7 ======================== -->
+  <section data-theme="light">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow" style="color:var(--blue)">02 — Parte II: Minería de Grafos</p>
+        <h2 class="section-title">Centralidad PageRank en Grafo Bipartito</h2>
+        <p class="section-lead">Inyectamos el 10-core en memoria para calcular el flujo de autoridad mediante iteraciones. Un negocio recibe alto puntaje difuso si es reseñado por usuarios muy activos.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-text">
+            <ul class="feature-list">
+              <li class="feature-item">
+                <div class="f-icon">⚡</div>
+                <div class="f-text">
+                  <h4>Técnica: PageRank Iterativo</h4>
+                  <p>Implementación iterativa con amortiguación (damping = 0.85). La autoridad de Google fluye en ambas direcciones (Usuarios ↔ Negocios) hasta converger.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">💡</div>
+                <div class="f-text">
+                  <h4>Hallazgo: "Anclas Geográficas"</h4>
+                  <p>PageRank premió negocios con ubicaciones estratégicas masivas (Reading Terminal Market, Café Du Monde). Demostró que la popularidad estructural atrae más a la masa que la perfección culinaria de 5 estrellas.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-visual">
+            <div class="terminal-box">
+<span class="yellow">=== TOP INFLUYENTES (PAGERANK) ===</span>
+<span class="green">Calculado en 11.45 segundos (100 iters)</span>
+
+ID    TYPE       SCORE      NAME
+---------------------------------------------
+1     Business   <span class="blue">0.00845</span>    Reading Terminal
+2     Business   <span class="blue">0.00712</span>    Pat's Steaks
+3     Business   <span class="blue">0.00699</span>    Café Du Monde
+...   ...        ...        ...
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">7 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 2 - SLIDE 8 ======================== -->
+  <section class="dark-section" data-theme="dark">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow" style="color:var(--blue)">02 — Parte II: Minería de Grafos</p>
+        <h2 class="section-title">Algoritmo HITS (Hubs y Authorities)</h2>
+        <p class="section-lead">HITS está diseñado expresamente para redes bipartitas. Diferencia rígidamente a quienes apuntan (Hubs/Usuarios) de quienes son apuntados (Authorities/Negocios).</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-3">
+          <div class="card v">
+            <div class="card-title">Técnica: Vectores HITS</div>
+            <div class="card-desc">Una "Autoridad" excepcional (buen negocio) debe ser apuntada por poderosos "Hubs". Y un Hub poderoso afina su puntería señalando a puras Autoridades de peso.</div>
+          </div>
+          <div class="card e">
+            <div class="card-title">La diferencia con PageRank</div>
+            <div class="card-desc">Mientras PageRank premia el volumen crudo, HITS Authority está acoplada a la calidad de los Hubs. Un negocio es Authority únicamente si la "Elite" lo avala.</div>
+          </div>
+          <div class="card b">
+            <div class="card-title">Hallazgo: El poder del "Foodie"</div>
+            <div class="card-desc">HITS perfiló automáticamente a los Críticos "Elite" de Yelp basándose <strong>sólo en sus trazas topológicas</strong>, probando que tu historial define tu autoridad en la red.</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">8 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 2 - SLIDE 9 ======================== -->
+  <section data-theme="light">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow" style="color:var(--blue)">02 — Parte II: Minería de Grafos</p>
+        <h2 class="section-title">Correlación Spearman: PageRank vs HITS</h2>
+        <p class="section-lead">Al cruzar los rankings generados por ambos algoritmos mediante el coeficiente de Spearman y la métrica de solapamiento Top 50, se revelaron dinámicas opuestas.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-visual">
+            <div class="terminal-box" style="background:#2b2b2b;">
+<span class="yellow">=== COMPARATIVA DE RANKINGS ===</span>
+
+<span class="green">Métricas para Negocios:</span>
+Spearman PR vs Auth : <span class="blue">0.3456</span>
+Solapamiento Top 50 : <span class="blue">16.0%</span>
+
+<span class="green">Métricas para Usuarios:</span>
+Spearman PR vs Hub  : <span class="blue">-0.6721</span>
+Solapamiento Top 50 : <span class="blue">0.0%</span>
+            </div>
+          </div>
+          <div class="col-text">
+            <ul class="feature-list">
+              <li class="feature-item">
+                <div class="f-icon">📈</div>
+                <div class="f-text">
+                  <h4>Solapamiento Pobre en Negocios (16%)</h4>
+                  <p>Confirma que tener un PageRank masivo por visitantes casuales no garantiza ser considerado una "Autoridad" culinaria por los Hubs estrictos.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">📉</div>
+                <div class="f-text">
+                  <h4>Correlación Inversa en Usuarios (-0.67)</h4>
+                  <p>En PageRank, mientras más reseñas escribe un usuario, más diluye y divide su propio PageRank. Sin embargo, en HITS, escribir muchas reseñas a buenos negocios ¡aumenta y maximiza tu Hub Score! Ambas métricas actúan de forma inversa sobre los humanos.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">9 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 2 - SLIDE 10 ======================== -->
+  <section class="dark-section" data-theme="dark">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow" style="color:var(--blue)">02 — Parte II: Minería de Grafos</p>
+        <h2 class="section-title">Comunidades Latentes (Algoritmo Louvain)</h2>
+        <p class="section-lead">Proyectamos el grafo fusionando iterativamente a los nodos para maximizar la Modularidad (Q). El algoritmo descubrió grupos densamente conectados sin supervisión humana.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-text">
+            <ul class="feature-list">
+              <li class="feature-item">
+                <div class="f-icon">🔍</div>
+                <div class="f-text">
+                  <h4>Técnica: Detección Aglomerativa</h4>
+                  <p>Mide la densidad de aristas internas frente al exterior. El algoritmo cerró el grafo en agrupaciones (comunidades) con una modularidad envidiable.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">🗺️</div>
+                <div class="f-text">
+                  <h4>Hallazgo 1: Fuerza Geográfica</h4>
+                  <p>Las mega-comunidades representan límites físicos (e.g. Reno, Saint Louis). Los humanos comen de forma local, creando cortes absolutos en el grafo bipartito.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">🍷</div>
+                <div class="f-text">
+                  <h4>Hallazgo 2: Barreras Temáticas</h4>
+                  <p>Dentro de una misma ciudad (Philadelphia), Louvain logró subdividir clústeres temáticos asombrosos: separó el circuito del "Turismo y American Brunch" del circuito cerrado de "Steakhouses y Vida Nocturna".</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-visual">
+            <div class="card v" style="background:transparent; border:1px solid rgba(255,255,255,.1);">
+              <div class="card-title" style="color:#fff;">Output Real: Caracterización</div>
+              <div class="card-desc" style="color:rgba(255,255,255,.6);">Al auditar el diccionario resultante de particiones, logramos automatizar un cruce contra la metadata de Pandas, revelando las ciudades y categorías maestras que definen a cada burbuja comunitaria recién descubierta.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">10 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 2 - SLIDE 11 ======================== -->
+  <section data-theme="light">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow" style="color:var(--blue)">02 — Parte II: Minería de Grafos</p>
+        <h2 class="section-title">Visualización del Grafo: Top Comunidades</h2>
+        <p class="section-lead">Para evitar una "bola de ruido visual", extrajimos un subgrafo representativo. Seleccionamos los Top 50 Nodos (por Grado) de las 4 Comunidades más grandes descubiertas por Louvain.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-visual">
+            <img src="p2/parte2_1.png" class="graph-img" style="border: 1px solid var(--grid); background:white;" alt="Grafo de Comunidades">
+          </div>
+          <div class="col-text">
+            <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
+              <div class="card-title">NetworkX y Fuerzas de Repulsión</div>
+              <div class="card-desc">Utilizando el algoritmo "Spring Layout" de NetworkX (simulación de resortes), los nodos afines se atrajeron y las comunidades no conectadas se repelieron solas en el lienzo.</div>
+            </div>
+            <div class="card b" style="background:transparent; border:none; border-top: 4px solid var(--blue); padding: 1.5rem 0; margin-top: 1rem;">
+              <div class="card-title">Confirmación Visual</div>
+              <div class="card-desc">La imagen generada (izquierda) comprueba gráficamente que el algoritmo Louvain clasificó perfectamente la red; la separación de colores es rotunda, evidenciando sub-redes orgánicas casi independientes del resto de la matriz global.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">11 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 4 - SLIDE 12 ======================== -->
+  <section class="dark-section" data-theme="dark">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow" style="color:var(--coral)">04 — Parte IV: Recomendadores</p>
+        <h2 class="section-title">Arquitectura Híbrida: CF + CBF</h2>
+        <p class="section-lead">La culminación predictiva del proyecto: predecir matemáticamente el *rating* que le dará un usuario a un negocio combinando el comportamiento masivo y los perfiles de contenido.</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-text">
+            <ul class="feature-list">
+              <li class="feature-item">
+                <div class="f-icon">📝</div>
+                <div class="f-text">
+                  <h4>Content-Based con TF-IDF</h4>
+                  <p>Construimos perfiles de negocio analizando sus categorías (texto) como vectores TF-IDF, logrando encontrar negocios similares temáticamente aunque nadie los haya visitado aún.</p>
+                </div>
+              </li>
+              <li class="feature-item">
+                <div class="f-icon">🤝</div>
+                <div class="f-text">
+                  <h4>Filtrado Colaborativo (User-Based)</h4>
+                  <p>Compara el historial (10-core) utilizando <i>Similitud del Coseno</i>. Pondera las calificaciones de los "vecinos" estadísticos del usuario para predecir si un local le gustará.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-visual">
+            <div class="card c" style="background:transparent; border:none; border-top: 4px solid var(--coral); padding: 1.5rem 0;">
+              <div class="card-title">Solución al Cold-Start</div>
+              <div class="card-desc">El CF puro falla cuando ingresa un nuevo usuario (sin historial) o un nuevo local (sin reseñas). Nuestra combinación <strong>Híbrida</strong> soluciona esto: el CF extrae conocimiento global, y si falla, el CBF recomienda leyendo el TF-IDF de las categorías basándose en preferencias iniciales directas.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">12 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 4 - SLIDE 13 ======================== -->
+  <section data-theme="light">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow" style="color:var(--coral)">04 — Parte IV: Recomendadores</p>
+        <h2 class="section-title">Evaluación Rigurosa de Modelos</h2>
+        <p class="section-lead">Dividimos el set en Train/Test y medimos la capacidad del sistema para "adivinar" los verdaderos negocios ocultos del Test Set frente a métodos estáticos (Baselines).</p>
+      </div>
+
+      <div class="content-body">
+        <div class="grid-2">
+          <div class="col-visual">
+            <div class="terminal-box" style="background:#2b2b2b; font-size:0.85rem; padding:1.2rem; overflow-x:auto;">
+<span class="yellow">Resultados Promedio (usando Test Split):</span>
+
+Modelo      | Prec@30 | Rec@30 | NDCG@30 | RMSE   | MAE    | Novelty | Diversity
+----------------------------------------------------------------------------------
+Híbrido     | 0.0040  | 0.0326 | <span class="blue">0.0182</span>  | 1.2535 | 1.1740 | <span class="green">9.8864</span>  | 0.8185
+Popularidad | 0.0040  | 0.0333 | 0.0168  | <span class="green">0.8373</span> | 0.7671 | 6.0962  | 0.8520
+Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
+            </div>
+          </div>
+          <div class="col-text">
+            <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
+              <div class="card-title">Híbrido gana en Calidad (NDCG)</div>
+              <div class="card-desc">El modelo Popularidad tiene un RMSE artificialmente menor simplemente porque apuesta siempre a las medias seguras. Sin embargo, el Híbrido demostró entregar un ranking más acertado (NDCG superior) para gustos individuales.</div>
+            </div>
+            <div class="card b" style="background:transparent; border:none; border-top: 4px solid var(--blue); padding: 1.5rem 0; margin-top: 1rem;">
+              <div class="card-title">Descubrimiento vs Obviedad (Novelty)</div>
+              <div class="card-desc">El Baseline Popular recomienda 10 veces el mismo "McDonalds" (Pobre novedad: 6.09). El Híbrido brilla extrayendo locales altamente afines pero oscuros y especializados de la <i>Long Tail</i> (Alta novedad: 9.88).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-count">13 / 14</div>
+    </div>
+  </section>
+
+  <!-- ======================== CONCLUSIÓN - SLIDE 14 ======================== -->
+  <section class="dark-section" data-theme="dark" style="background:var(--card-bg);">
+    <div class="container slide-content" style="align-items: center; text-align: center;">
+      <h2 class="section-title" style="margin-bottom: 2rem;">Cierre: El Verdadero Poder de la Minería</h2>
+      
+      <p class="section-lead" style="margin: 0 auto 3rem; max-width: 900px;">
+        Yelp nos demostró una lección rotunda: aplicar algoritmos de recomendación predictiva pesados en la Parte IV es una pérdida de tiempo si la Parte I es un mar de ruido. <strong>La calidad estructural dicta el triunfo del sistema.</strong>
+      </p>
+      
+      <div class="grid-2" style="text-align: left; width: 100%; max-width: 1200px;">
+        <div class="highlight-box" style="margin: 0; background: rgba(127,119,221,.1); border-left-color: var(--violet); border-radius: 8px;">
+          <strong>Estructura Latente</strong><br>Los grafos bipartitos y el algoritmo de Louvain comprobaron que el comportamiento masivo no es aleatorio; segmenta de forma natural nuestra sociedad en "tribus de consumo" geográficas y sociales casi invisibles.
+        </div>
+        <div class="highlight-box" style="margin: 0; background: rgba(216,90,48,.1); border-left-color: var(--coral); border-radius: 8px;">
+          <strong>Modelos Conscientes</strong><br>Forzar un k-core alto proveyó de densidad al Filtrado Colaborativo, y el TF-IDF eliminó el <i>Cold-Start</i>. La minería de datos moderna exige una arquitectura Híbrida para descubrir la <i>Long Tail</i>.
+        </div>
+      </div>
+      <div class="slide-count">14 / 14</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  let currentSlide = 0;
+  const sections = document.querySelectorAll('section');
+  const totalSlides = sections.length;
+  const slider = document.getElementById('slider');
+  const navbar = document.getElementById('navbar');
+  const links = document.querySelectorAll('.nav-links a');
+
+  function updateSlide() {
+    slider.style.transform = `translateY(-${currentSlide * 100}vh)`;
+    sections.forEach((sec, idx) => {
+      if (idx === currentSlide) {
+        sec.classList.add('active');
+        if (sec.getAttribute('data-theme') === 'dark') {
+          navbar.classList.add('dark-mode');
+        } else {
+          navbar.classList.remove('dark-mode');
+        }
+      } else {
+        sec.classList.remove('active');
+      }
+    });
+
+    links.forEach(l => l.classList.remove('active'));
+    if(currentSlide === 0) document.getElementById('link-0').classList.add('active');
+    else if(currentSlide >= 1 && currentSlide <= 6) document.getElementById('link-1').classList.add('active');
+    else if(currentSlide >= 7 && currentSlide <= 11) document.getElementById('link-7').classList.add('active');
+    else if(currentSlide >= 12 && currentSlide <= 13) document.getElementById('link-12').classList.add('active');
+  }
+
+  function goToSlide(index) {
+    if (index >= 0 && index < totalSlides) {
+      currentSlide = index;
+      updateSlide();
+    }
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+      goToSlide(currentSlide + 1);
+      if(e.key === ' ') e.preventDefault();
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      goToSlide(currentSlide - 1);
+    }
+  });
+
+  updateSlide();
+</script>
+</body>
+</html>

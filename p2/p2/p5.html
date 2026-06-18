@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parte V — Data Mining en Streams</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+
+  :root {
+    --ink:     #0d0f1a;
+    --paper:   #f4f3f8;
+    --violet:  #7F77DD;
+    --emerald: #1D9E75;
+    --coral:   #D85A30;
+    --blue:    #3F6FAE;
+    --pink:    #AE3F6F;
+    --mid:     #6b6d8a;
+    --grid:    #e0dff0;
+    --card-bg: #ffffff;
+    --code-bg: #1a1b2e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Space Grotesk', sans-serif; background: var(--paper); color: var(--ink); overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; gap: 2rem;
+    padding: .9rem 2.5rem;
+    background: rgba(244,243,248,0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--grid);
+  }
+  .nav-logo { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 600; color: var(--violet); letter-spacing: .1em; }
+  .nav-links { display: flex; gap: 1.5rem; margin-left: auto; }
+  .nav-links a { font-size: .78rem; font-weight: 500; color: var(--mid); text-decoration: none; letter-spacing: .04em; transition: color .2s; }
+  .nav-links a:hover { color: var(--violet); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 6rem 2rem 5rem;
+    background: linear-gradient(155deg, #1a1b2e 0%, #0f1528 55%, #0a0c1a 100%);
+    position: relative; overflow: hidden;
+  }
+  #hero::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 65%, rgba(127,119,221,.18) 0%, transparent 70%),
+      radial-gradient(ellipse 45% 50% at 80% 30%, rgba(29,158,117,.11) 0%, transparent 70%);
+  }
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: .72rem; letter-spacing: .15em; color: var(--violet);
+    border: 1px solid rgba(127,119,221,.4); padding: .35rem .95rem; border-radius: 999px;
+    margin-bottom: 2rem; position: relative;
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5.4rem); font-weight: 700; color: #fff;
+    line-height: 1.05; text-align: center; position: relative;
+  }
+  .hero-title em { font-style: italic; color: var(--violet); }
+  .hero-sub { font-size: 1rem; color: rgba(255,255,255,.5); text-align: center; max-width: 520px; margin-top: 1.5rem; line-height: 1.65; position: relative; }
+  .hero-chips { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 2.5rem; justify-content: center; position: relative; }
+  .chip { font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .06em; padding: .28rem .75rem; border-radius: 999px; border: 1px solid; }
+  .chip.v { color: var(--violet); border-color: rgba(127,119,221,.4); }
+  .chip.e { color: var(--emerald); border-color: rgba(29,158,117,.4); }
+  .chip.c { color: var(--coral); border-color: rgba(216,90,48,.4); }
+  .chip.b { color: #7eb4f0; border-color: rgba(63,111,174,.4); }
+  .hero-scroll { position: absolute; bottom: 2.5rem; display: flex; flex-direction: column; align-items: center; gap: .4rem; color: rgba(255,255,255,.28); font-size: .68rem; letter-spacing: .12em; animation: bounce 2.5s ease-in-out infinite; }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+
+  /* LAYOUT */
+  section { padding: 5.5rem 0; }
+  .container { max-width: 1040px; margin: 0 auto; padding: 0 2.5rem; }
+  .section-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .16em; font-weight: 600; color: var(--violet); text-transform: uppercase; margin-bottom: .6rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.7rem, 4vw, 2.7rem); font-weight: 700; line-height: 1.1; margin-bottom: 1rem; }
+  .section-lead { font-size: 1rem; color: var(--mid); line-height: 1.7; max-width: 660px; margin-bottom: 2.5rem; }
+  .divider { height: 1px; background: var(--grid); }
+
+  /* CARDS */
+  .card { background: var(--card-bg); border: 1px solid var(--grid); border-radius: 14px; padding: 1.8rem 2rem; box-shadow: 0 2px 16px rgba(0,0,0,.04); }
+  .card:hover { box-shadow: 0 6px 32px rgba(127,119,221,.10); }
+
+  /* GRAPH PLACEHOLDER */
+  .graph-slot {
+    background: linear-gradient(135deg, rgba(127,119,221,.04), rgba(29,158,117,.03));
+    border: 1.5px dashed rgba(127,119,221,.25);
+    border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem;
+    min-height: 260px;
+    color: var(--mid);
+  }
+  .graph-slot-icon { font-size: 2rem; opacity: .4; }
+  .graph-slot-label { font-family: 'JetBrains Mono', monospace; font-size: .72rem; letter-spacing: .08em; color: var(--mid); opacity: .7; text-align: center; padding: 0 1rem; }
+
+  /* INSIGHTS ROW — solo subtítulo */
+  .insights-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+  .ins {
+    background: var(--card-bg); border: 1px solid var(--grid); border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    border-left: 3px solid var(--violet);
+    transition: box-shadow .2s;
+  }
+  .ins:hover { box-shadow: 0 4px 20px rgba(0,0,0,.07); }
+  .ins.e { border-left-color: var(--emerald); }
+  .ins.c { border-left-color: var(--coral); }
+  .ins.b { border-left-color: var(--blue); }
+  .ins-title { font-size: .82rem; font-weight: 700; margin-bottom: .35rem; color: var(--ink); }
+  .ins-desc { font-size: .78rem; color: var(--mid); line-height: 1.55; }
+
+  /* COMPLEXITY PILLS */
+  .cx-row { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.2rem; }
+  .cx-pill {
+    display: flex; flex-direction: column; gap: .2rem;
+    background: var(--paper); border-radius: 10px; padding: .8rem 1.1rem;
+    min-width: 110px;
+  }
+  .cx-pill-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); font-weight: 600; }
+  .cx-pill-val { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; }
+  .cx-pill-val.v { color: var(--violet); }
+  .cx-pill-val.e { color: var(--emerald); }
+  .cx-pill-val.c { color: var(--coral); }
+  .cx-pill-val.b { color: var(--blue); }
+  .cx-pill-sub { font-size: .68rem; color: var(--mid); }
+
+  /* DARK SECTION */
+  .dark-section { background: #0d0f1a; padding: 5.5rem 0; }
+  .dark-section .section-title { color: #fff; }
+  .dark-section .section-lead { color: rgba(255,255,255,.42); }
+  .dark-section .section-eyebrow { color: var(--emerald); }
+
+  /* GRAPH PLACEHOLDER dark */
+  .graph-slot-dark {
+    background: rgba(255,255,255,.025);
+    border: 1.5px dashed rgba(255,255,255,.1);
+    border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem;
+    min-height: 260px;
+  }
+  .graph-slot-dark .graph-slot-label { color: rgba(255,255,255,.3); }
+  .graph-slot-dark .graph-slot-icon { opacity: .25; }
+
+  /* FORMULA BLOCK */
+  .formula-block {
+    background: var(--code-bg); border-radius: 10px;
+    padding: 1rem 1.4rem;
+    font-family: 'JetBrains Mono', monospace; font-size: .88rem;
+    color: #c9d1e8; line-height: 2;
+    display: flex; flex-direction: column; gap: .1rem;
+  }
+  .formula-block .f-label { font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.25); margin-bottom: -.2rem; }
+  .formula-block .f-val { color: #a78bfa; }
+  .formula-block .f-desc { font-size: .72rem; color: rgba(255,255,255,.35); font-family: 'Space Grotesk', sans-serif; margin-top: -.4rem; margin-bottom: .4rem; }
+
+  /* DGIM BUCKET VIZ */
+  .dgim-flow {
+    display: flex; align-items: center; gap: 0; overflow-x: auto;
+    padding: 1.2rem 1.4rem;
+    background: var(--code-bg); border-radius: 12px;
+    scrollbar-width: thin;
+  }
+  .dgim-bit { width: 26px; height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; flex-shrink: 0; margin: 0 1px; }
+  .dgim-bit.b1 { background: rgba(29,158,117,.25); color: var(--emerald); }
+  .dgim-bit.b0 { background: rgba(255,255,255,.05); color: rgba(255,255,255,.2); }
+  .dgim-bucket-row { display: flex; align-items: flex-end; gap: 3px; padding: .6rem 0; overflow-x: auto; }
+  .dgim-bkt { border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: .7rem; font-weight: 700; color: #fff; flex-shrink: 0; transition: all .35s; }
+
+  /* COMPARE TABLE */
+  .cmp { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 1.4rem; }
+  .cmp th { background: rgba(255,255,255,.04); font-weight: 600; padding: .65rem 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,.08); font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; color: rgba(255,255,255,.35); }
+  .cmp td { padding: .65rem 1rem; border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; line-height: 1.5; color: rgba(255,255,255,.7); }
+  .cmp tr:last-child td { border-bottom: none; }
+  .cmp td:first-child { color: rgba(255,255,255,.9); font-weight: 600; }
+  .badge { display: inline-block; padding: .12rem .5rem; border-radius: 5px; font-size: .68rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .badge.g { background: rgba(29,158,117,.15); color: var(--emerald); }
+  .badge.w { background: rgba(216,90,48,.15); color: var(--coral); }
+  .badge.i { background: rgba(127,119,221,.15); color: var(--violet); }
+
+  /* CONCLUSION LIST */
+  .con-list { list-style: none; margin-top: 2rem; }
+  .con-list li { display: flex; gap: 1.2rem; padding: 1.4rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .con-list li:last-child { border-bottom: none; }
+  .con-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--violet); flex-shrink: 0; width: 2rem; line-height: 1; }
+  .con-text { font-size: .9rem; color: rgba(255,255,255,.6); line-height: 1.7; }
+  .con-text strong { color: rgba(255,255,255,.9); }
+
+  /* KEYWORD TAGS */
+  .kw-group { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+  .kw-tag { font-family: 'JetBrains Mono', monospace; font-size: .72rem; padding: .25rem .7rem; border-radius: 6px; font-weight: 600; }
+  .kw-tag.v { background: rgba(127,119,221,.12); color: var(--violet); }
+  .kw-tag.e { background: rgba(29,158,117,.12); color: var(--emerald); }
+  .kw-tag.c { background: rgba(216,90,48,.12); color: var(--coral); }
+  .kw-tag.b { background: rgba(63,111,174,.12); color: var(--blue); }
+  .kw-tag.w { background: rgba(255,255,255,.06); color: rgba(255,255,255,.6); }
+
+  /* GRAPHS GRID */
+  .graphs-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .graphs-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; }
+  @media (max-width: 720px) { .graphs-2col, .graphs-3col { grid-template-columns: 1fr; } }
+
+  /* FADE IN */
+  .fi { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+  .fi.vis { opacity: 1; transform: translateY(0); }
+
+  /* STEP INLINE */
+  .step-row { display: flex; gap: .8rem; align-items: flex-start; margin-bottom: .7rem; }
+  .step-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; flex-shrink: 0; margin-top: .15rem; }
+  .step-dot.v { background: rgba(127,119,221,.15); color: var(--violet); }
+  .step-dot.e { background: rgba(29,158,117,.15); color: var(--emerald); }
+  .step-dot.c { background: rgba(216,90,48,.15); color: var(--coral); }
+  .step-t { font-size: .84rem; color: rgba(255,255,255,.65); line-height: 1.6; }
+  .step-t code { font-family: 'JetBrains Mono', monospace; font-size: .78rem; background: rgba(127,119,221,.12); color: #a78bfa; padding: .05em .35em; border-radius: 3px; }
+
+  /* DGIM DEMO */
+  .bit-stream-row { display: flex; gap: 2px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: .4rem; }
+  .bit { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: .7rem; font-weight: 700; flex-shrink: 0; }
+  .bit-1 { background: rgba(29,158,117,.25); color: var(--emerald); }
+  .bit-0 { background: rgba(255,255,255,.06); color: rgba(255,255,255,.25); }
+  .bit-new { background: var(--violet); color: #fff; animation: flash .4s ease; }
+  @keyframes flash { 0% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  .bucket-row { display: flex; align-items: flex-end; gap: 4px; min-height: 56px; overflow-x: auto; }
+  .bucket { border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: .68rem; font-weight: 700; color: #fff; flex-shrink: 0; transition: all .3s; }
+
+  .btn { background: var(--violet); color: #fff; border: none; border-radius: 8px; padding: .55rem 1.3rem; font-size: .82rem; font-weight: 600; cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: background .2s, transform .1s; }
+  .btn:hover { background: #6c64cc; }
+  .btn:active { transform: scale(.97); }
+  .btn.mid { background: var(--mid); }
+  .btn.mid:hover { background: #555; }
+  .btn.em { background: var(--emerald); }
+  .btn.em:hover { background: #178a64; }
+
+  .demo-out { background: var(--code-bg); border-radius: 9px; padding: 1rem 1.2rem; font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: #c9d1e8; line-height: 1.8; min-height: 60px; margin-top: .8rem; }
+  .ok { color: var(--emerald); } .warn { color: var(--coral); } .lbl { color: #a78bfa; }
+
+  select, input[type=number], input[type=text] {
+    padding: .5rem .8rem; border: 1px solid var(--grid); border-radius: 7px;
+    font-family: 'JetBrains Mono', monospace; font-size: .82rem; background: var(--paper); color: var(--ink); outline: none;
+  }
+  select:focus, input:focus { border-color: var(--violet); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">DM // Parte V</span>
+  <div class="nav-links">
+    <a href="#ventanas">Ventanas</a>
+    <a href="#cms">Count-Min Sketch</a>
+    <a href="#dgim">DGIM</a>
+    <a href="#conclusiones">Conclusiones</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════ HERO ══════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-tag">Data Mining · Streaming Algorithms</div>
+  <h1 class="hero-title">Minería sobre<br><em>Streams de Datos</em></h1>
+  <p class="hero-sub">Parte V — Análisis de reseñas Yelp en tiempo real: ventanas deslizantes, conteo aproximado y estimación de bits en ventana.</p>
+  <div class="hero-chips">
+    <span class="chip v">⟳ Sliding Windows</span>
+    <span class="chip e">≈ Count-Min Sketch</span>
+    <span class="chip c">⊞ DGIM</span>
+    <span class="chip b">📊 Yelp Reviews Stream</span>
+  </div>
+  <div class="hero-scroll">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M4 9l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    scroll
+  </div>
+</section>
+
+<!-- ════════════════════════ VENTANAS DESLIZANTES ════════════════════════════ -->
+<section id="ventanas">
+  <div class="container">
+    <p class="section-eyebrow fi">01 — Técnica</p>
+    <h2 class="section-title fi">Ventanas Deslizantes</h2>
+    <p class="section-lead fi">El stream de reseñas se divide en franjas temporales fijas (1h · 4h · 1 día). Cada ventana mantiene acumuladores <code style="font-family:JetBrains Mono,monospace;background:rgba(127,119,221,.1);color:var(--violet);padding:.05em .35em;border-radius:4px;">count / sum / sum_sq</code> que se emiten al cerrarse — sin guardar ningún evento individual.</p>
+
+    <!-- Complejidad -->
+    <div class="cx-row fi">
+      <div class="cx-pill"><span class="cx-pill-label">Memoria</span><span class="cx-pill-val v">O(1)</span><span class="cx-pill-sub">por ventana activa</span></div>
+      <div class="cx-pill"><span class="cx-pill-label">Actualización</span><span class="cx-pill-val e">O(1)</span><span class="cx-pill-sub">por evento</span></div>
+      <div class="cx-pill"><span class="cx-pill-label">Emisión</span><span class="cx-pill-val v">O(1)</span><span class="cx-pill-sub">al cerrar ventana</span></div>
+      <div class="cx-pill"><span class="cx-pill-label">Tamaños</span><span class="cx-pill-val b">1h · 4h · 1D</span><span class="cx-pill-sub">ventanas evaluadas</span></div>
+    </div>
+
+    <!-- ── Gráfico 1: comparación de avg_stars entre ventanas ── -->
+    <div style="margin-top: 2.8rem;">
+      <p class="section-eyebrow fi" style="margin-bottom:.4rem;">Gráfico 1</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">Comparación de <em>average stars</em> entre tamaños de ventana</h3>
+      <p class="fi" style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;">Serie temporal + distribución + resumen estadístico por ventana.</p>
+      <div class="fi" style="border-radius:12px;overflow:hidden;border:1px solid var(--grid);">
+        <img src="asVentanas.png" alt="Comparación de average stars por tamaño de ventana" style="width:100%;display:block;">
+      </div>
+    </div>
+
+    <!-- ── Gráfico 2: count (volumen) ── -->
+    <div style="margin-top: 2rem;">
+      <p class="section-eyebrow fi" style="margin-bottom:.4rem;">Gráfico 2</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">Comparación de <em>densidad de reseñas</em> entre las 3 ventanas</h3>
+      <p class="fi" style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;">Cómo varía el número de reseñas por franja según el tamaño elegido.</p>
+      <div class="fi" style="border-radius:12px;overflow:hidden;border:1px solid var(--grid);">
+        <img src="3ventanas.png" alt="Comparación de densidad de reseñas entre las 3 ventanas" style="width:100%;display:block;">
+      </div>
+    </div>
+
+    <!-- ── Gráfico 3: dashboard de métricas (4 paneles) ── -->
+    <div style="margin-top: 2rem;">
+      <p class="section-eyebrow fi" style="margin-bottom:.4rem;">Gráfico 3</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">Dashboard de métricas por ventana </h3>
+      <p class="fi" style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;"></p>
+      <div class="graph-slot fi" style="min-height:320px;">
+        <div class="graph-slot-icon"></div>
+        <div class="graph-slot-label"></div>
+          <div class="fi" style="border-radius:12px;overflow:hidden;border:1px solid var(--grid);">
+        <img src="métricas_Ven.png" alt="" style="width:100%;display:block;">
+        
+      </div>
+      </div>
+    </div>
+
+    <!-- ── Gráfico 4: rolling 30 días ── -->
+    <div style="margin-top: 2rem;">
+      <p class="section-eyebrow fi" style="margin-bottom:.4rem;">Gráfico 4</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">Promedio móvil 30 días — volumen y calidad</h3>
+      <p class="fi" style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;">Suavizado del ruido diario para detectar tendencia y posible concept drift.</p>
+      <div class="fi" style="border-radius:12px;overflow:hidden;border:1px solid var(--grid);">
+        <img src="movil.png" alt="Media móvil de densidad y volumen (30 días)" style="width:100%;display:block;">
+      </div>
+    </div>
+
+    <!-- ── Gráfico 5: patrones horarios ── -->
+    <div style="margin-top: 2rem;">
+      <p class="section-eyebrow fi" style="margin-bottom:.4rem;">Gráfico 5</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">Patrones horarios — ventana 1h</h3>
+      <p class="fi" style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;">Distribución histograma y promedio de estrellas por hora del día.</p>
+      <div class="fi" style="border-radius:12px;overflow:hidden;border:1px solid var(--grid);">
+        <img src="v1h.png" alt="Histograma y promedio de estrellas por hora — ventana 1h" style="width:100%;display:block;">
+      </div>
+    </div>
+
+    <!-- ── Gráfico 6: heatmap hora × dow ── -->
+    <div style="margin-top: 2rem;">
+      <p class="section-eyebrow fi" style="margin-bottom:.4rem;">Gráfico 6</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">Densidad de la ventana 1h — por horas del día</h3>
+      <p class="fi" style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;">Distribución de densidad por hora del día para la ventana de 1h.</p>
+      <div class="fi" style="border-radius:12px;overflow:hidden;border:1px solid var(--grid);">
+        <img src="v1h_densi.png" alt="Densidad por horas del día — ventana 1h" style="width:100%;display:block;">
+      </div>
+    </div>
+
+    <!-- ── Gráfico 7: estacionalidad mensual / anual ── -->
+    <div style="margin-top: 2rem;">
+      <p class="section-eyebrow fi" style="margin-bottom:.4rem;">Gráfico 7</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">Ciclos estacionales — vista por mes</h3>
+      <p class="fi" style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;">Histograma/distribución mensual y densidad correspondiente.</p>
+      <div class="graphs-2col fi">
+        <img src="v2_mes.png" alt="Distribución mensual — ventana 2" style="width:100%;display:block;border-radius:10px;border:1px solid var(--grid);">
+        <img src="v2_densi.png" alt="Densidad mensual — ventana 2" style="width:100%;display:block;border-radius:10px;border:1px solid var(--grid);">
+      </div>
+    </div>
+
+    <!-- ── Gráfico 8: densidad ── -->
+    <div style="margin-top: 2rem;">
+      <p class="section-eyebrow fi" style="margin-bottom:.4rem;">Gráfico 8</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">Distribución de densidad — comparativa en las 3 ventanas</h3>
+      <p class="fi" style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;">Densidad de avg_stars por separado para cada tamaño de ventana: 1h · 4h · 1 día.</p>
+      <div class="graphs-3col fi">
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--violet);font-family:'JetBrains Mono',monospace;">Ventana 1h</div>
+          <img src="densidad2_w1h.png" alt="Densidad ventana 1h" style="width:100%;border-radius:10px;border:1px solid var(--grid);">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);font-family:'JetBrains Mono',monospace;">Ventana 4h</div>
+          <img src="densidad2_w4h.png" alt="Densidad ventana 4h" style="width:100%;border-radius:10px;border:1px solid var(--grid);">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--coral);font-family:'JetBrains Mono',monospace;">Ventana 1 día</div>
+          <img src="densidad2_w1d.png" alt="Densidad ventana 1 día" style="width:100%;border-radius:10px;border:1px solid var(--grid);">
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights ventanas -->
+    <div style="margin-top:2.8rem;">
+      <p class="section-eyebrow fi">Insights</p>
+      <div class="insights-row">
+        <div class="ins fi">
+          <div class="ins-title">Mayor varianza en ventanas pequeñas</div>
+          <div class="ins-desc">Menor ventana → menos muestras → promedio de stars más volátil. Fenómeno esperado en streaming.</div>
+        </div>
+        <div class="ins e fi">
+          <div class="ins-title">Pico nocturno 18–22h</div>
+          <div class="ins-desc">La actividad se concentra en horas de la noche, con mayor volumen viernes y sábados.</div>
+        </div>
+        <div class="ins c fi">
+          <div class="ins-title">Caída COVID-2020 visible</div>
+          <div class="ins-desc">La serie de n_reviews diarias muestra una caída abrupta que coincide con la pandemia.</div>
+        </div>
+        <div class="ins b fi">
+          <div class="ins-title">Concept drift en calidad</div>
+          <div class="ins-desc">El rolling de 30 días revela drift en avg_stars respecto al promedio global histórico.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════ COUNT-MIN SKETCH ══════════════════════════════ -->
+<section id="cms">
+  <div class="container">
+    <p class="section-eyebrow fi">02 — Conteo Aproximado</p>
+    <h2 class="section-title fi">Count-Min Sketch</h2>
+    <p class="section-lead fi">Estima la frecuencia de reseñas por <code style="font-family:JetBrains Mono,monospace;background:rgba(127,119,221,.1);color:var(--violet);padding:.05em .35em;border-radius:4px;">business_id</code> procesando el stream elemento a elemento. Matriz fija de contadores — sin tabla hash proporcional al número de elementos únicos.</p>
+
+    <!-- Keywords -->
+    <div class="kw-group fi">
+      <span class="kw-tag v">k filas</span>
+      <span class="kw-tag v">w columnas</span>
+      <span class="kw-tag e">k funciones hash</span>
+      <span class="kw-tag e">Inserción: C[i, hᵢ(x)] += 1</span>
+      <span class="kw-tag c">Consulta: min_i C[i, hᵢ(x)]</span>
+      <span class="kw-tag b">Nunca subestima</span>
+    </div>
+
+    <!-- Fórmulas -->
+    <div class="fi" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+      <div class="formula-block">
+        <span class="f-label">Error máximo</span>
+        <span class="f-val">f̂(x) ≤ f(x) + ε·N</span>
+        <span class="f-desc">con probabilidad ≥ 1 − δ</span>
+        <span class="f-label">Parámetros</span>
+        <span class="f-val">ε = e/w &nbsp;·&nbsp; δ = e<sup>−k</sup></span>
+        <span class="f-desc">k=4, w=2000 → ε·N ≈ 50</span>
+      </div>
+      <div class="formula-block">
+        <span class="f-label">Garantía dura</span>
+        <span class="f-val">f̂(x) ≥ f(x) siempre</span>
+        <span class="f-desc">nunca subestima — confirmado empíricamente</span>
+        <span class="f-label">Memoria</span>
+        <span class="f-val">k × w contadores</span>
+        <span class="f-desc">k=4, w=2000 → 8,000 cont. ≈ 62.5 KB</span>
+      </div>
+    </div>
+
+    <!-- Complejidad -->
+    <div class="cx-row fi" style="margin-top:1.2rem;">
+      <div class="cx-pill"><span class="cx-pill-label">Memoria</span><span class="cx-pill-val v">O(k·w)</span><span class="cx-pill-sub">fija, independiente de |S|</span></div>
+      <div class="cx-pill"><span class="cx-pill-label">Inserción</span><span class="cx-pill-val e">O(k)</span><span class="cx-pill-sub">por elemento</span></div>
+      <div class="cx-pill"><span class="cx-pill-label">Consulta</span><span class="cx-pill-val e">O(k)</span><span class="cx-pill-sub">por elemento</span></div>
+      <div class="cx-pill"><span class="cx-pill-label">Error</span><span class="cx-pill-val c">≤ ε·N</span><span class="cx-pill-sub">prob. 1−δ</span></div>
+    </div>
+
+    <!-- Gráficos CMS -->
+    <div style="margin-top:2.8rem;background:var(--paper);border:1px solid var(--grid);border-radius:16px;padding:2rem;" class="fi">
+      <p class="section-eyebrow" style="margin-bottom:1.2rem;">Gráficos 9 · 10 · 11 — Count-Min Sketch</p>
+
+      <div style="margin-bottom:2rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.3rem;">Gráfico 9 — Conteo exacto vs estimación CMS + distribución de error</h3>
+        <p style="font-size:.8rem;color:var(--mid);margin-bottom:.8rem;">Todos los puntos caen sobre o por encima de y=x. Error concentrado cerca de 0, muy por debajo de ε·N.</p>
+        <img src="CMS_1.png" alt="Conteo exacto vs estimación CMS y distribución de error" style="width:100%;border-radius:10px;border:1px solid var(--grid);">
+      </div>
+
+      <div style="margin-bottom:2rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.3rem;">Gráfico 10 — Trade-off: efecto de <em>w</em> sobre error y memoria</h3>
+        <p style="font-size:.8rem;color:var(--mid);margin-bottom:.8rem;">A mayor w → menor ε → menor error garantizado a costa de más memoria.</p>
+        <img src="CMS_2.png" alt="Error vs w — trade-off memoria y error en CMS" style="width:100%;border-radius:10px;border:1px solid var(--grid);">
+      </div>
+
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.3rem;">Gráfico 11 — Efecto de <em>k</em> (número de hashes) sobre error y δ</h3>
+        <p style="font-size:.8rem;color:var(--mid);margin-bottom:.8rem;">A mayor k → δ = e⁻ᵏ decrece exponencialmente. Eje dual: error máximo vs probabilidad de fallo.</p>
+        <img src="CMS_3.png" alt="Efecto de k sobre error en CMS" style="width:100%;border-radius:10px;border:1px solid var(--grid);">
+      </div>
+    </div>
+
+    <!-- Insights CMS -->
+    <div style="margin-top:2.5rem;">
+      <p class="section-eyebrow fi">Insights</p>
+      <div class="insights-row">
+        <div class="ins fi">
+          <div class="ins-title">100% sin subestimación</div>
+          <div class="ins-desc">Ningún business_id tuvo error negativo en el experimento. La garantía f̂ ≥ f se cumple empíricamente.</div>
+        </div>
+        <div class="ins e fi">
+          <div class="ins-title">Error real &ll; cota teórica</div>
+          <div class="ins-desc">El error promedio es una fracción pequeña de ε·N — el sketch es mucho más preciso que lo garantizado.</div>
+        </div>
+        <div class="ins c fi">
+          <div class="ins-title">w domina más que k</div>
+          <div class="ins-desc">Doblar w reduce el error a la mitad. Doblar k reduce δ exponencialmente pero impacta menos el error promedio.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════ DGIM ══════════════════════════════════ -->
+<section class="dark-section" id="dgim">
+  <div class="container">
+    <p class="section-eyebrow fi">03 — Ventana Binaria Reciente</p>
+    <h2 class="section-title fi">Algoritmo DGIM</h2>
+    <p class="section-lead fi">¿Cuántas de las últimas N reseñas fueron "útiles"? — sin guardar los N bits del historial. Memoria O(log² N) en lugar de O(N).</p>
+
+    <!-- Keywords DGIM -->
+    <div class="kw-group fi">
+      <span class="kw-tag w">Stream binario</span>
+      <span class="kw-tag e">bₜ = 1 si useful &gt; 0</span>
+      <span class="kw-tag v">Buckets: (timestamp, size)</span>
+      <span class="kw-tag c">size = potencia de 2</span>
+      <span class="kw-tag w">Fusión cuando ≥ 3 del mismo tamaño</span>
+      <span class="kw-tag e">Expiración al salir de la ventana N</span>
+    </div>
+
+    <!-- Cómo funciona: pasos + fórmulas -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.6rem;" class="fi">
+      <div>
+        <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:600;margin-bottom:.9rem;">Operaciones</div>
+        <div class="step-row"><div class="step-dot e">1</div><div class="step-t">Bit=1 → crear bucket <code>(t, size=1)</code>. Bit=0 → no crear bucket.</div></div>
+        <div class="step-row"><div class="step-dot c">2</div><div class="step-t">Expirar buckets con <code>timestamp &lt; t − N</code>.</div></div>
+        <div class="step-row"><div class="step-dot v">3</div><div class="step-t">Si ≥ 3 buckets de tamaño <em>s</em> → fusionar los 2 más viejos en 1 de tamaño <code>2s</code>.</div></div>
+        <div class="step-row"><div class="step-dot e">4</div><div class="step-t">Consulta: <code>Σ sizes − size_último / 2</code></div></div>
+      </div>
+      <div class="formula-block">
+        <span class="f-label">Estimación</span>
+        <span class="f-val">f̂ = Σ(sizes) − ⌊size_último / 2⌋</span>
+        <span class="f-desc">suma de todos los buckets, menos la mitad del más antiguo</span>
+        <span class="f-label">Error máximo garantizado</span>
+        <span class="f-val">error &lt; 50%</span>
+        <span class="f-desc">en la práctica ~2% sobre reseñas Yelp</span>
+        <span class="f-label">Complejidad de actualización</span>
+        <span class="f-val">O(1) amortizado · O(log N) peor caso</span>
+        <span class="f-desc">cascada de fusiones en el peor caso</span>
+      </div>
+    </div>
+
+    <!-- Complejidad DGIM -->
+    <div class="cx-row fi" style="margin-top:.2rem;">
+      <div class="cx-pill" style="background:rgba(255,255,255,.04);"><span class="cx-pill-label" style="color:rgba(255,255,255,.3);">Memoria</span><span class="cx-pill-val c">O(log² N)</span><span class="cx-pill-sub" style="color:rgba(255,255,255,.25);">buckets activos</span></div>
+      <div class="cx-pill" style="background:rgba(255,255,255,.04);"><span class="cx-pill-label" style="color:rgba(255,255,255,.3);">Actualización</span><span class="cx-pill-val e">O(1) amort.</span><span class="cx-pill-sub" style="color:rgba(255,255,255,.25);">por bit recibido</span></div>
+      <div class="cx-pill" style="background:rgba(255,255,255,.04);"><span class="cx-pill-label" style="color:rgba(255,255,255,.3);">Error máximo</span><span class="cx-pill-val c">&lt; 50%</span><span class="cx-pill-sub" style="color:rgba(255,255,255,.25);">teórico</span></div>
+      <div class="cx-pill" style="background:rgba(255,255,255,.04);"><span class="cx-pill-label" style="color:rgba(255,255,255,.3);">Ahorro vs exacto</span><span class="cx-pill-val e">~300×</span><span class="cx-pill-sub" style="color:rgba(255,255,255,.25);">para N=100,000</span></div>
+    </div>
+
+    <!-- Visualizador DGIM interactivo -->
+    <div class="fi" style="margin-top:2rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.8rem 2rem;">
+      <div style="font-size:.95rem;font-weight:700;color:#fff;margin-bottom:.4rem;">🎮 Visualizador DGIM — ingresa bits y observa los buckets</div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,.35);margin-bottom:1.2rem;">Cada "1" crea un bucket nuevo. Los buckets se fusionan automáticamente cuando hay ≥ 3 del mismo tamaño.</div>
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
+        <select id="dgim-bit" style="background:#0d0f1a;color:#c9d1e8;border-color:rgba(255,255,255,.1);width:130px;">
+          <option value="1">bit = 1 (útil)</option>
+          <option value="0">bit = 0</option>
+        </select>
+        <input id="dgim-n" type="number" value="32" min="4" max="256" style="background:#0d0f1a;color:#c9d1e8;border-color:rgba(255,255,255,.1);width:80px;" title="Tamaño ventana N"/>
+        <span style="font-size:.72rem;color:rgba(255,255,255,.3);">N =</span>
+        <button class="btn" onclick="dgimAdd()">+ Bit</button>
+        <button class="btn em" onclick="dgimAuto()">▶ Auto (24 bits)</button>
+        <button class="btn mid" onclick="dgimReset()">Reiniciar</button>
+      </div>
+
+      <div style="margin-bottom:.6rem;">
+        <div style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:.4rem;font-weight:600;">Stream — más reciente a la izquierda</div>
+        <div class="bit-stream-row" id="dgim-stream"><span style="color:rgba(255,255,255,.15);font-size:.75rem;font-family:'JetBrains Mono',monospace;">sin bits aún</span></div>
+      </div>
+
+      <div style="background:var(--code-bg);border-radius:10px;padding:1rem 1.2rem;margin-top:.6rem;">
+        <div style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:.7rem;font-weight:600;">Buckets activos (más reciente → más antiguo)</div>
+        <div class="bucket-row" id="dgim-buckets"><span style="color:rgba(255,255,255,.15);font-size:.78rem;font-family:'JetBrains Mono',monospace;">—</span></div>
+        <div id="dgim-estimate" style="margin-top:.9rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:rgba(255,255,255,.55);">Estimación: —</div>
+      </div>
+    </div>
+
+    <!-- Gráficos DGIM -->
+    <div style="margin-top:2.5rem;">
+      <p class="section-eyebrow fi" style="color:var(--coral);margin-bottom:.4rem;">Gráfico 12</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.3rem;">DGIM vs conteo exacto — evolución + error + memoria</h3>
+      <p class="fi" style="font-size:.82rem;color:rgba(255,255,255,.35);margin-bottom:1rem;">Dashboard 3 paneles: estimación vs real · % error · # buckets activos a lo largo del stream.</p>
+      <div class="fi" style="border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.1);">
+        <img src="DGIM_1.png" alt="DGIM vs conteo exacto — distribución y evolución" style="width:100%;display:block;">
+      </div>
+    </div>
+
+    <div style="margin-top:2rem;">
+      <p class="section-eyebrow fi" style="color:var(--coral);margin-bottom:.4rem;">Gráfico 13</p>
+      <h3 class="fi" style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.3rem;">Sensibilidad al tamaño de ventana N — error y memoria</h3>
+      <div class="fi" style="border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.1);">
+        <img src="DGIM_v2.png" alt="DGIM — error vs tamaño de ventana N" style="width:100%;display:block;">
+      </div>
+    </div>
+
+    <!-- DGIM vs CMS comparativa -->
+    <div class="fi" style="margin-top:2.8rem;">
+      <p class="section-eyebrow" style="color:var(--violet);margin-bottom:.8rem;">DGIM vs Count-Min Sketch — diferencias clave</p>
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>Aspecto</th>
+            <th>Count-Min Sketch</th>
+            <th>DGIM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pregunta</td>
+            <td>¿Cuántas veces aparece x en todo el stream?</td>
+            <td>¿Cuántos 1s en las últimas N posiciones?</td>
+          </tr>
+          <tr>
+            <td>Input</td>
+            <td>Cualquier elemento (string, ID…)</td>
+            <td>Stream binario {0, 1}</td>
+          </tr>
+          <tr>
+            <td>Memoria</td>
+            <td><span class="badge i">O(k·w) fija</span></td>
+            <td><span class="badge i">O(log² N)</span></td>
+          </tr>
+          <tr>
+            <td>Ventana</td>
+            <td><span class="badge w">Todo el stream acumulado</span></td>
+            <td><span class="badge g">Últimos N eventos solamente</span></td>
+          </tr>
+          <tr>
+            <td>Error</td>
+            <td>≤ ε·N (con prob. 1−δ) · <span class="badge g">nunca subestima</span></td>
+            <td>&lt; 50% · <span class="badge w">puede sobrestimar o subestimar</span></td>
+          </tr>
+          <tr>
+            <td>Ventaja principal</td>
+            <td>Múltiples elementos simultáneos · error probabilístico acotado</td>
+            <td><span class="badge g">Olvida automáticamente</span> eventos viejos · ideal para alertas recientes</td>
+          </tr>
+          <tr>
+            <td>Cuándo usarlo</td>
+            <td>Ranking de frecuencias globales (top-k, heavy hitters)</td>
+            <td>Monitoreo en tiempo real de comportamiento reciente</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Insights DGIM -->
+    <div style="margin-top:2.5rem;">
+      <p class="section-eyebrow fi" style="color:var(--coral);">Insights</p>
+      <div class="insights-row">
+        <div class="ins fi" style="background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.07);border-left-color:var(--coral);">
+          <div class="ins-title" style="color:rgba(255,255,255,.85);">Error real ~2% vs cota 50%</div>
+          <div class="ins-desc">El peor caso teórico rara vez ocurre. Sobre Yelp, DGIM es muy preciso.</div>
+        </div>
+        <div class="ins e fi" style="background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.07);">
+          <div class="ins-title" style="color:rgba(255,255,255,.85);">~300× ahorro de memoria</div>
+          <div class="ins-desc">Para N=100,000 bits: exacto usa 100 KB; DGIM usa ~330 bits.</div>
+        </div>
+        <div class="ins fi" style="background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.07);border-left-color:var(--violet);">
+          <div class="ins-title" style="color:rgba(255,255,255,.85);">Escalabilidad por negocio</div>
+          <div class="ins-desc">k negocios con DGIM: O(k·log²N). Con exacto: O(k·N) — diferencia de órdenes de magnitud.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider" style="background:rgba(255,255,255,.06);"></div>
+
+<!-- ══════════════════════════════ CONCLUSIONES ══════════════════════════════ -->
+<section class="dark-section" id="conclusiones" style="background:#0a0c1a;">
+  <div class="container">
+    <p class="section-eyebrow fi">04 — Cierre</p>
+    <h2 class="section-title fi">Conclusiones</h2>
+    <p class="section-lead fi">Tres técnicas de streaming, una misma fuente de datos, tres preguntas distintas — todas con memoria acotada.</p>
+
+    <ul class="con-list">
+      <li class="fi">
+        <div class="con-num">1</div>
+        <div class="con-text"><strong>Ventanas deslizantes (1h · 4h · 1D)</strong> revelaron la estructura temporal completa del stream: tendencia de crecimiento, caída COVID-2020, pico nocturno 18–22h, estacionalidad mensual y posible concept drift — todo con acumuladores O(1) por ventana, sin almacenar ningún evento.</div>
+      </li>
+      <li class="fi">
+        <div class="con-num">2</div>
+        <div class="con-text"><strong>Count-Min Sketch (k=4, w=2000)</strong> estimó la frecuencia de miles de <em>business_ids</em> en 62.5 KB fijos, garantizando nunca subestimar. El error empírico está muy por debajo de ε·N. El trade-off memoria/error es controlable con w; la confianza con k.</div>
+      </li>
+      <li class="fi">
+        <div class="con-num">3</div>
+        <div class="con-text"><strong>DGIM</strong> respondió "¿cuántas reseñas útiles en las últimas N?" con O(log² N) memoria y ~2% de error real (cota 50%). A diferencia de CMS, olvida automáticamente eventos antiguos — ideal para monitoreo de comportamiento reciente por negocio a escala.</div>
+      </li>
+    </ul>
+
+    <!-- 3 pills finales -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:3rem;" class="fi">
+      <div style="background:rgba(127,119,221,.08);border:1px solid rgba(127,119,221,.15);border-radius:12px;padding:1.4rem;text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--violet);margin-bottom:.3rem;">O(1)</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.45);">Ventanas deslizantes<br>por ventana activa</div>
+      </div>
+      <div style="background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.15);border-radius:12px;padding:1.4rem;text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--emerald);margin-bottom:.3rem;">O(k·w)</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.45);">Count-Min Sketch<br>fija, independiente de |S|</div>
+      </div>
+      <div style="background:rgba(216,90,48,.08);border:1px solid rgba(216,90,48,.15);border-radius:12px;padding:1.4rem;text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--coral);margin-bottom:.3rem;">O(log²N)</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.45);">DGIM<br>buckets activos</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ── SCROLL FADE-IN ──
+const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis'); }), { threshold: 0.1 });
+document.querySelectorAll('.fi').forEach(el => obs.observe(el));
+
+// ── DGIM SIMULATOR ──
+let DS = { buckets: [], stream: [], t: 0 };
+
+function dgimGetN() { return parseInt(document.getElementById('dgim-n').value) || 32; }
+
+function dgimMerge(buckets) {
+  let changed = true;
+  while(changed) {
+    changed = false;
+    const by = {};
+    buckets.forEach((b,i) => { if(!by[b.size]) by[b.size]=[]; by[b.size].push(i); });
+    for(const sz of Object.keys(by).map(Number).sort()) {
+      if(by[sz] && by[sz].length >= 3) {
+        const [a,b2] = by[sz];
+        buckets.splice(a, 2, { t: buckets[b2 > a ? b2-1 : b2].t, size: sz*2 });
+        changed = true; break;
+      }
+    }
+  }
+  return buckets;
+}
+
+function dgimAdd(bit) {
+  if(bit === undefined) bit = parseInt(document.getElementById('dgim-bit').value);
+  const N = dgimGetN();
+  DS.t++;
+  DS.stream.unshift(bit);
+  if(DS.stream.length > 48) DS.stream.pop();
+  if(bit === 1) DS.buckets.push({ t: DS.t, size: 1 });
+  DS.buckets = DS.buckets.filter(b => b.t >= DS.t - N);
+  DS.buckets = dgimMerge(DS.buckets);
+  renderDGIM();
+}
+
+function dgimReset() { DS = { buckets:[], stream:[], t:0 }; renderDGIM(); }
+
+function dgimAuto() {
+  const bits = [1,0,1,1,0,1,0,0,1,1,1,0,1,0,1,1,0,0,1,0,1,1,0,1];
+  let i = 0;
+  const iv = setInterval(() => { dgimAdd(bits[i]); i++; if(i>=bits.length) clearInterval(iv); }, 180);
+}
+
+function renderDGIM() {
+  const sEl = document.getElementById('dgim-stream');
+  sEl.innerHTML = DS.stream.length === 0
+    ? '<span style="color:rgba(255,255,255,.15);font-size:.75rem;font-family:JetBrains Mono,monospace;">sin bits aún</span>'
+    : DS.stream.map((b,i) => `<div class="bit ${i===0?'bit-new':b?'bit-1':'bit-0'}">${b}</div>`).join('');
+
+  const bEl = document.getElementById('dgim-buckets');
+  if(DS.buckets.length === 0) {
+    bEl.innerHTML = '<span style="color:rgba(255,255,255,.15);font-size:.78rem;font-family:JetBrains Mono,monospace;">—</span>';
+  } else {
+    const cols = ['#7F77DD','#1D9E75','#D85A30','#3F6FAE','#AE3F6F','#f59e0b','#60a5fa'];
+    bEl.innerHTML = DS.buckets.slice().reverse().map(b => {
+      const w = Math.max(36, Math.min(Math.log2(b.size)*20+28, 90));
+      const h = Math.max(28, Math.min(Math.log2(b.size)*10+24, 56));
+      const c = cols[Math.round(Math.log2(b.size)) % cols.length];
+      return `<div class="bucket" style="width:${w}px;height:${h}px;background:${c}22;border:1.5px solid ${c}66;flex-direction:column;gap:1px;">`+
+             `<span style="font-size:.68rem;">${b.size}</span>`+
+             `<span style="font-size:.52rem;opacity:.4;">t${b.t}</span></div>`;
+    }).join('');
+  }
+
+  const est = DS.buckets.length === 0 ? 0 : DS.buckets.reduce((s,b)=>s+b.size,0) - Math.floor(DS.buckets[DS.buckets.length-1].size/2);
+  const real = DS.stream.filter(b=>b===1).length;
+  const err = real > 0 ? Math.abs(est-real)/real*100 : 0;
+  document.getElementById('dgim-estimate').innerHTML =
+    `t = ${DS.t} &nbsp;·&nbsp; buckets: <span style="color:#a78bfa;">${DS.buckets.length}</span> &nbsp;·&nbsp; `+
+    `estimación: <span style="color:var(--emerald);font-weight:600;">${est}</span> &nbsp;·&nbsp; `+
+    `real (visible): <span style="color:#f59e0b;">${real}</span> &nbsp;·&nbsp; `+
+    `error: <span style="color:${err<50?'var(--emerald)':'var(--coral)'};">${err.toFixed(1)}%</span>`;
+}
+
+renderDGIM();
+</script>
+</body>
+</html>
