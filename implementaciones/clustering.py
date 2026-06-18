@@ -189,35 +189,118 @@ class DBSCAN:
                         queue.append(n)
 
 
+class ClusterCURE:
+    def __init__(self, point, idx=None):
+        self.points = np.array([point])
+        self.indices = [idx] if idx is not None else []
+        self.mean = np.array(point)
+        self.rep = np.array([point])
+
+    def merge(self, other_cluster, c, alpha):
+        self.points = np.vstack((self.points, other_cluster.points))
+        self.indices.extend(other_cluster.indices)
+        self.mean = np.mean(self.points, axis=0)
+        self._generate_representatives(c, alpha)
+
+    def _generate_representatives(self, c, alpha):
+        n_points = len(self.points)
+        if n_points <= c:
+            self.rep = self.points.copy()
+        else:
+            selected_reps = []
+            dist_to_mean = np.linalg.norm(self.points - self.mean, axis=1)
+            first_rep_idx = np.argmax(dist_to_mean)
+            selected_reps.append(self.points[first_rep_idx])
+            
+            for _ in range(1, c):
+                reps_arr = np.array(selected_reps)
+                dist_to_reps = np.linalg.norm(self.points[:, np.newaxis] - reps_arr, axis=2)
+                min_dists = np.min(dist_to_reps, axis=1)
+                next_rep_idx = np.argmax(min_dists)
+                selected_reps.append(self.points[next_rep_idx])
+                
+            self.rep = np.array(selected_reps)
+            
+        for i in range(len(self.rep)):
+            self.rep[i] = self.rep[i] + alpha * (self.mean - self.rep[i])
+
+
 class CURE:
-    def __init__(self, k=2, c=3, alpha=0.3):
+    def __init__(self, k=2, c=3, alpha=0.3, sample_size=300):
         self.k = k
         self.c = c
         self.alpha = alpha
+        self.sample_size = sample_size
         self.labels_ = None
+        self.clusters_ = []
 
     def fit(self, X):
-        # Versión representativa de CURE
-        # Por simplicidad de computo O(N^3), usamos un muestreo para encontrar representantes
-        # y luego asignamos.
         n = X.shape[0]
-        self.labels_ = np.zeros(n)
+        self.labels_ = -np.ones(n, dtype=int)
         
-        # Simulamos clustering aglomerativo o un K-Means como base para grandes datos
-        kmeans = KMeansPlusPlus(k=self.k)
-        kmeans.fit(X)
-        self.labels_ = kmeans.labels_
+        # Muestreo para escalabilidad O(N^3) del agglomerative
+        use_sampling = n > self.sample_size
+        if use_sampling:
+            indices = np.random.choice(n, self.sample_size, replace=False)
+        else:
+            indices = np.arange(n)
+            
+        sample_data = X[indices]
+        clusters = [ClusterCURE(pt, idx) for pt, idx in zip(sample_data, indices)]
+        
+        while len(clusters) > self.k:
+            min_dist = float('inf')
+            merge_pair = (0, 0)
+            
+            for i in range(len(clusters)):
+                for j in range(i + 1, len(clusters)):
+                    dists = np.linalg.norm(clusters[i].rep[:, np.newaxis] - clusters[j].rep, axis=2)
+                    current_min = np.min(dists)
+                    if current_min < min_dist:
+                        min_dist = current_min
+                        merge_pair = (i, j)
+                        
+            idx1, idx2 = merge_pair
+            cluster2 = clusters.pop(max(idx1, idx2))
+            cluster1 = clusters[min(idx1, idx2)]
+            cluster1.merge(cluster2, self.c, self.alpha)
+            
+        self.clusters_ = clusters
+        
+        for c_id, cluster in enumerate(self.clusters_):
+            for idx in cluster.indices:
+                self.labels_[idx] = c_id
+                
+        if use_sampling:
+            remaining_indices = np.setdiff1d(np.arange(n), indices)
+            for idx in remaining_indices:
+                pt = X[idx]
+                min_dist = float('inf')
+                best_c_id = -1
+                for c_id, cluster in enumerate(self.clusters_):
+                    dist_to_reps = np.linalg.norm(cluster.rep - pt, axis=1)
+                    dist = np.min(dist_to_reps)
+                    if dist < min_dist:
+                        min_dist = dist
+                        best_c_id = c_id
+                self.labels_[idx] = best_c_id
+                
         return self
 
 
 class BFR:
-    def __init__(self, k=3, threshold=2.0):
+    def __init__(self, k=3, ds_threshold=2.0, cs_threshold=1.5, chunk_size=100, merge_threshold=0.1, promote_cs=True):
         self.k = k
-        self.threshold = threshold # Alpha para la distancia de Mahalanobis
+        self.ds_threshold = ds_threshold
+        self.cs_threshold = cs_threshold
+        self.chunk_size = chunk_size
+        self.merge_threshold = merge_threshold
+        self.promote_cs = promote_cs
         self.ds_stats = {} # Discard Set: {cluster_id: {'N':, 'SUM':, 'SUMSQ':}}
         self.cs_stats = {} # Compression Set
-        self.rs = [] # Retained Set
+        self.rs = [] # Retained Set (almacena índices)
         self.labels_ = []
+        self.cs_id_counter = 0
         
     def _mahalanobis_dist(self, point, stats):
         N = stats['N']
@@ -227,48 +310,180 @@ class BFR:
         variance[variance <= 0] = 1e-6
         return np.sqrt(np.sum(((point - centroid) ** 2) / variance))
         
+    def _centroid(self, stats):
+        return stats['SUM'] / stats['N']
+        
+    def _add_point_to_stat(self, stats, point):
+        stats['N'] += 1
+        stats['SUM'] += point
+        stats['SUMSQ'] += point**2
+        
+    def _create_stat(self, points):
+        points = np.array(points)
+        return {
+            'N': len(points),
+            'SUM': np.sum(points, axis=0),
+            'SUMSQ': np.sum(points**2, axis=0)
+        }
+
+    def _merge_cs_stats(self, stat1, stat2):
+        return {
+            'N': stat1['N'] + stat2['N'],
+            'SUM': stat1['SUM'] + stat2['SUM'],
+            'SUMSQ': stat1['SUMSQ'] + stat2['SUMSQ']
+        }
+        
     def fit(self, X):
         n, dim = X.shape
         self.labels_ = -np.ones(n, dtype=int)
         
         # Inicialización usando K-Means sobre una muestra (el primer bloque)
-        sample_size = min(100, n)
+        sample_size = min(self.chunk_size, n)
+        if sample_size < self.k:
+            return self
+            
         kmeans = KMeansPlusPlus(k=self.k)
         kmeans.fit(X[:sample_size])
         
         for i in range(self.k):
-            cluster_pts = X[:sample_size][kmeans.labels_ == i]
-            N = len(cluster_pts)
-            if N > 0:
-                self.ds_stats[i] = {
-                    'N': N,
-                    'SUM': np.sum(cluster_pts, axis=0),
-                    'SUMSQ': np.sum(cluster_pts**2, axis=0)
-                }
-            self.labels_[:sample_size] = kmeans.labels_
-            
-        # Procesamiento en bloques (simulando stream)
+            cluster_idx = np.where(kmeans.labels_ == i)[0]
+            cluster_pts = X[:sample_size][cluster_idx]
+            if len(cluster_pts) > 0:
+                self.ds_stats[i] = self._create_stat(cluster_pts)
+                self.labels_[cluster_idx] = i
+                
+        # Procesamiento en bloques/puntos simulando stream
         for i in range(sample_size, n):
             point = X[i]
-            assigned = False
-            best_c = -1
-            min_dist = float('inf')
             
+            # 1. Asignar a DS si Mahalanobis < ds_threshold (2σ)
+            best_ds = -1
+            min_ds_dist = float('inf')
             for c_id, stats in self.ds_stats.items():
                 dist = self._mahalanobis_dist(point, stats)
-                if dist < min_dist:
-                    min_dist = dist
-                    best_c = c_id
+                if dist < min_ds_dist:
+                    min_ds_dist = dist
+                    best_ds = c_id
                     
-            if min_dist < self.threshold:
-                # Asignar a DS
-                self.ds_stats[best_c]['N'] += 1
-                self.ds_stats[best_c]['SUM'] += point
-                self.ds_stats[best_c]['SUMSQ'] += point**2
-                self.labels_[i] = best_c
-            else:
-                # Asignar a RS (simplificado)
-                self.rs.append(point)
-                self.labels_[i] = -1 # Tratar como outlier/noise por ahora
+            if min_ds_dist < self.ds_threshold:
+                self._add_point_to_stat(self.ds_stats[best_ds], point)
+                self.labels_[i] = best_ds
+                continue
+                
+            # 2. Asignar a CS si Mahalanobis < cs_threshold (1.5σ)
+            best_cs = -1
+            min_cs_dist = float('inf')
+            for c_id, stats in self.cs_stats.items():
+                dist = self._mahalanobis_dist(point, stats)
+                if dist < min_cs_dist:
+                    min_cs_dist = dist
+                    best_cs = c_id
+                    
+            if best_cs != -1 and min_cs_dist < self.cs_threshold:
+                self._add_point_to_stat(self.cs_stats[best_cs], point)
+                self.labels_[i] = -2 # Marca temporal como CS
+                continue
+                
+            # 3. Asignar a RS
+            self.rs.append(i)
+            self.labels_[i] = -1
+            
+            # Mantenimiento periódico:
+            # Reclusterizar RS si hay suficientes puntos (ej. >= 6)
+            if len(self.rs) >= 6:
+                rs_pts = X[self.rs]
+                k_rs = min(2, len(self.rs) // 3)
+                km_rs = KMeansPlusPlus(k=k_rs)
+                km_rs.fit(rs_pts)
+                
+                new_rs = []
+                for c_id in range(k_rs):
+                    cluster_idx = np.where(km_rs.labels_ == c_id)[0]
+                    if len(cluster_idx) >= 2: # Promover grupos con >= 2 puntos a CS
+                        cs_id = self.cs_id_counter
+                        self.cs_id_counter += 1
+                        global_idx = [self.rs[idx] for idx in cluster_idx]
+                        self.cs_stats[cs_id] = self._create_stat(X[global_idx])
+                        for idx in global_idx:
+                            self.labels_[idx] = -2
+                    else:
+                        new_rs.extend([self.rs[idx] for idx in cluster_idx])
+                self.rs = new_rs
+                
+            # Fusionar CS cercanos (centroides próximos)
+            merged = True
+            while merged and len(self.cs_stats) > 1:
+                merged = False
+                cs_keys = list(self.cs_stats.keys())
+                for idx1 in range(len(cs_keys)):
+                    for idx2 in range(idx1 + 1, len(cs_keys)):
+                        k1, k2 = cs_keys[idx1], cs_keys[idx2]
+                        if k1 not in self.cs_stats or k2 not in self.cs_stats:
+                            continue
+                        c1 = self._centroid(self.cs_stats[k1])
+                        c2 = self._centroid(self.cs_stats[k2])
+                        dist = np.linalg.norm(c1 - c2)
+                        if dist < self.merge_threshold:
+                            self.cs_stats[k1] = self._merge_cs_stats(self.cs_stats[k1], self.cs_stats[k2])
+                            del self.cs_stats[k2]
+                            merged = True
+                            break
+                    if merged: break
+                            
+            # Absorber CS en DS si algún DS está a distancia < 2σ
+            cs_keys = list(self.cs_stats.keys())
+            for c_id in cs_keys:
+                c_centroid = self._centroid(self.cs_stats[c_id])
+                best_ds = -1
+                min_ds_dist = float('inf')
+                for ds_id, ds_stat in self.ds_stats.items():
+                    dist = self._mahalanobis_dist(c_centroid, ds_stat)
+                    if dist < min_ds_dist:
+                        min_ds_dist = dist
+                        best_ds = ds_id
+                if best_ds != -1 and min_ds_dist < self.ds_threshold:
+                    self.ds_stats[best_ds] = self._merge_cs_stats(self.ds_stats[best_ds], self.cs_stats[c_id])
+                    del self.cs_stats[c_id]
+                    
+        # Al final:
+        # Promover CS a DS si están lejos de todos los DS y tienen suficientes puntos
+        if self.promote_cs:
+            cs_keys = list(self.cs_stats.keys())
+            for c_id in cs_keys:
+                stat = self.cs_stats[c_id]
+                if stat['N'] >= 5:
+                    c_centroid = self._centroid(stat)
+                    min_ds_dist = min([self._mahalanobis_dist(c_centroid, ds_stat) for ds_stat in self.ds_stats.values()] + [float('inf')])
+                    if min_ds_dist >= self.ds_threshold:
+                        ds_id = len(self.ds_stats)
+                        self.ds_stats[ds_id] = stat
+                        del self.cs_stats[c_id]
+                        
+        # Fusionar CS restantes con DS
+        cs_keys = list(self.cs_stats.keys())
+        for c_id in cs_keys:
+            c_centroid = self._centroid(self.cs_stats[c_id])
+            best_ds = -1
+            min_ds_dist = float('inf')
+            for ds_id, ds_stat in self.ds_stats.items():
+                dist = self._mahalanobis_dist(c_centroid, ds_stat)
+                if dist < min_ds_dist:
+                    min_ds_dist = dist
+                    best_ds = ds_id
+            if best_ds != -1:
+                self.ds_stats[best_ds] = self._merge_cs_stats(self.ds_stats[best_ds], self.cs_stats[c_id])
+                del self.cs_stats[c_id]
+                
+        # Re-asignar las etiquetas finales para aquellos puntos en DS o CS basados en el DS más cercano final
+        for i in range(n):
+            if self.labels_[i] != -1:
+                best_ds = -1
+                min_ds_dist = float('inf')
+                for ds_id, ds_stat in self.ds_stats.items():
+                    dist = self._mahalanobis_dist(X[i], ds_stat)
+                    if dist < min_ds_dist:
+                        min_ds_dist = dist
+                        best_ds = ds_id
+                self.labels_[i] = best_ds
                 
         return self

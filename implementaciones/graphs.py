@@ -327,6 +327,148 @@ class BipartiteGraph(Graph):
             return 0.0
         return self.number_of_edges() / (u * p)
 
+import random
+import time
+
+class DiGraph:
+    """
+    Clase base de Grafo Dirigido optimizada.
+    """
+    def __init__(self):
+        self.adj = {}  # Enlaces salientes: nodo -> set de nodos a los que apunta
+        self.in_adj = {} # Enlaces entrantes (útil para HITS/PageRank): nodo -> set de nodos que lo apuntan
+        self.num_edges_count = 0
+
+    def add_node(self, node):
+        if node not in self.adj:
+            self.adj[node] = set()
+            self.in_adj[node] = set()
+
+    def add_edge(self, u, v):
+        """Añade una arista dirigida u -> v"""
+        self.add_node(u)
+        self.add_node(v)
+        if v not in self.adj[u]:
+            self.adj[u].add(v)
+            self.in_adj[v].add(u)
+            self.num_edges_count += 1
+
+    def number_of_nodes(self):
+        return len(self.adj)
+
+    def number_of_edges(self):
+        return self.num_edges_count
+
+    def density(self):
+        v = self.number_of_nodes()
+        if v <= 1:
+            return 0.0
+        return float(self.num_edges_count) / (v * (v - 1))
+
+    # --- ALGORITMOS AJUSTADOS A DIRIGIDO ---
+
+    def pagerank(self, damping=0.85, max_iter=100, tol=1e-6):
+        nodes = list(self.adj.keys())
+        N = len(nodes)
+        if N == 0:
+            return {}
+        
+        pr = {node: 1.0 / N for node in nodes}
+        out_degree = {node: len(self.adj[node]) for node in nodes}
+        dangling_nodes = [node for node in nodes if out_degree[node] == 0]
+        
+        for iteration in range(max_iter):
+            next_pr = {node: 0.0 for node in nodes}
+            dangling_sum = sum(pr[node] for node in dangling_nodes)
+            
+            # Distribuir a través de los enlaces salientes
+            for node in nodes:
+                deg = out_degree[node]
+                if deg > 0:
+                    share = pr[node] / deg
+                    for neighbor in self.adj[node]:
+                        next_pr[neighbor] += share
+            
+            # Teleportación + Distribución de sumideros (Fórmula de tu diapositiva)
+            teleport = (1.0 - damping) / N
+            dangling_allocation = (damping * dangling_sum) / N
+            
+            for node in nodes:
+                next_pr[node] = (damping * next_pr[node]) + teleport + dangling_allocation
+            
+            err = sum(abs(next_pr[node] - pr[node]) for node in nodes)
+            pr = next_pr
+            if err < tol:
+                break
+                
+        return pr
+
+    def hits(self, max_iter=100, tol=1e-6):
+        nodes = list(self.adj.keys())
+        if len(nodes) == 0:
+            return {}, {}
+        
+        hubs = {node: 1.0 for node in nodes}
+        authorities = {node: 1.0 for node in nodes}
+        
+        for iteration in range(max_iter):
+            next_authorities = {node: 0.0 for node in nodes}
+            next_hubs = {node: 0.0 for node in nodes}
+            
+            # 1. Autoridad: se recibe de los hubs que te apuntan (in_adj)
+            for node in nodes:
+                next_authorities[node] = sum(hubs[parent] for parent in self.in_adj[node])
+                
+            # 2. Hubs: apuntan a nodos con alta autoridad (adj)
+            for node in nodes:
+                next_hubs[node] = sum(authorities[child] for child in self.adj[node])
+                
+            # Normalización L2
+            norm_auth = sum(val**2 for val in next_authorities.values())**0.5
+            if norm_auth > 0:
+                for node in nodes: next_authorities[node] /= norm_auth
+                    
+            norm_hub = sum(val**2 for val in next_hubs.values())**0.5
+            if norm_hub > 0:
+                for node in nodes: next_hubs[node] /= norm_hub
+            
+            err_auth = sum(abs(next_authorities[node] - authorities[node]) for node in nodes)
+            err_hub = sum(abs(next_hubs[node] - hubs[node]) for node in nodes)
+            
+            authorities = next_authorities
+            hubs = next_hubs
+            
+            if err_auth < tol and err_hub < tol:
+                break
+                
+        return hubs, authorities
+
+class BipartiteDiGraph(DiGraph):
+    """
+    Subclase especializada para grafos bipartitos DIRIGIDOS (Usuario -> Producto/Negocio).
+    """
+    def __init__(self):
+        super().__init__()
+        self.user_nodes = set()
+        self.product_nodes = set()
+
+    def add_bipartite_edge(self, user, product):
+        u_node = f"U_{user}" if not str(user).startswith("U_") else user
+        p_node = f"P_{product}" if not str(product).startswith("P_") else product
+        
+        self.user_nodes.add(u_node)
+        self.product_nodes.add(p_node)
+        
+        # Enlace estrictamente dirigido: Usuario apunta a Negocio
+        self.add_edge(u_node, p_node)
+
+    def bipartite_density(self):
+        u = len(self.user_nodes)
+        p = len(self.product_nodes)
+        if u == 0 or p == 0:
+            return 0.0
+        return self.number_of_edges() / (u * p)
+    
 def _louvain_phase1(adj_weighted, tol=1e-6):
     # Calcular grados ponderados k
     k = {u: sum(neighbors.values()) for u, neighbors in adj_weighted.items()}
