@@ -8,16 +8,16 @@
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
 
   :root {
-    --ink:     #0d0f1a;
-    --paper:   #f4f3f8;
-    --violet:  #7F77DD;
-    --emerald: #1D9E75;
-    --coral:   #D85A30;
-    --blue:    #3F6FAE;
-    --mid:     #6b6d8a;
-    --grid:    #e0dff0;
+    --ink:     #2c2520; /* Deep warm charcoal */
+    --paper:   #f7f4eb; /* Warm antique cream paper */
+    --violet:  #a24c6d; /* Warm berry/plum */
+    --emerald: #4d7a5b; /* Warm sage/olive green */
+    --coral:   #d35430; /* Warm terracotta orange */
+    --blue:    #3f6f96; /* Warm slate blue */
+    --mid:     #7c7167; /* Warm muted clay grey */
+    --grid:    #e8e2d5; /* Soft warm gridline */
     --card-bg: #ffffff;
-    --code-bg: #0d0e15;
+    --code-bg: #1f1b19; /* Warm dark charcoal for terminal */
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,9 +46,9 @@
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   nav.dark-mode { 
-    background: rgba(13, 15, 26, 0.7); 
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    background: rgba(247, 244, 235, 0.85); 
+    border-color: rgba(44, 37, 32, 0.1);
+    box-shadow: 0 10px 30px rgba(44,37,32,0.05);
   }
   .nav-logo { 
     font-family: 'JetBrains Mono', monospace; 
@@ -100,8 +100,8 @@
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .dot-nav.dark-mode-dots {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.08);
+    background: rgba(247,244,235,0.6);
+    border-color: rgba(44,37,32,0.1);
   }
   .dot-item {
     width: 8px;
@@ -133,25 +133,25 @@
     position: relative; overflow: hidden; 
   }
   
-  /* LIGHT THEMING (GRID PAPER BACKGROUND) */
+  /* LIGHT THEMING (GRID PAPER BACKGROUND - WARM CREAM) */
   section[data-theme="light"] {
-    background: radial-gradient(circle at 10% 20%, rgba(244,243,248,1) 0%, rgba(236,234,246,1) 90%);
+    background: var(--paper);
   }
   section[data-theme="light"]::before {
     content: ''; position: absolute; inset: 0;
     background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
     background-size: 50px 50px;
-    opacity: 0.25; pointer-events: none;
+    opacity: 0.45; pointer-events: none;
   }
 
-  /* DARK THEMING (AMBIENT GLOWS) */
+  /* DARK THEMING (NOW WARM SAND BEIGE) */
   section[data-theme="dark"] {
-    background: linear-gradient(155deg, #0d0f1a 0%, #070912 100%);
+    background: #ede8da;
   }
   section[data-theme="dark"]::before {
     content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 80% 25%, rgba(127,119,221,0.08) 0%, transparent 60%),
-                radial-gradient(circle at 20% 75%, rgba(29,158,117,0.05) 0%, transparent 50%);
+    background: radial-gradient(circle at 80% 25%, rgba(211,84,48,0.05) 0%, transparent 60%),
+                radial-gradient(circle at 20% 75%, rgba(162,76,109,0.05) 0%, transparent 50%);
     pointer-events: none;
   }
 
@@ -164,12 +164,12 @@
     z-index: 10;
   }
 
-  /* HERO */
-  #hero { background: linear-gradient(155deg, #0f101d 0%, #070810 100%); align-items: center; padding: 0 2rem; }
+  /* HERO (WARM OPTIMIZED) */
+  #hero { background: linear-gradient(155deg, #f7f4eb 0%, #ede8da 100%); align-items: center; padding: 0 2rem; }
   #hero::before { 
     content: ''; position: absolute; inset: 0; 
-    background: radial-gradient(circle at 30% 60%, rgba(127,119,221,.16) 0%, transparent 60%), 
-                radial-gradient(circle at 70% 30%, rgba(216,90,48,.10) 0%, transparent 50%); 
+    background: radial-gradient(circle at 30% 60%, rgba(162,76,109,.06) 0%, transparent 60%), 
+                radial-gradient(circle at 70% 30%, rgba(211,84,48,.05) 0%, transparent 50%); 
   }
   .hero-tag { 
     font-family: 'JetBrains Mono', monospace; 
@@ -177,25 +177,27 @@
     letter-spacing: .2em; 
     text-transform: uppercase;
     color: var(--violet); 
-    border: 1px solid rgba(127,119,221,.3); 
+    border: 1px solid rgba(162,76,109,.3); 
     padding: .5rem 1.4rem; 
     border-radius: 999px; 
     margin-bottom: 2rem;
-    background: rgba(127,119,221,0.05);
+    background: rgba(162,76,109,0.05);
     backdrop-filter: blur(10px);
   }
   .hero-title { 
     font-family: 'Playfair Display', serif; 
     font-size: clamp(3.2rem, 6.5vw, 5.8rem); 
     font-weight: 700; 
-    color: #fff; 
+    background: linear-gradient(135deg, var(--coral) 0%, var(--violet) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     line-height: 1.1; 
     text-align: center; 
   }
-  .hero-title em { font-style: italic; color: var(--violet); font-weight: 400; }
+  .hero-title em { font-style: italic; font-weight: 400; }
   .hero-sub { 
     font-size: 1.2rem; 
-    color: rgba(255,255,255,.45); 
+    color: var(--mid); 
     text-align: center; 
     max-width: 750px; 
     margin-top: 1.8rem; 
@@ -204,18 +206,18 @@
   .nav-hint { 
     position: absolute; bottom: 2.5rem; 
     display: flex; align-items: center; gap: .8rem; 
-    color: rgba(255,255,255,.25); 
+    color: var(--mid); 
     font-size: .8rem; 
     letter-spacing: .08em; 
     width:100%; justify-content: center; 
   }
   .key { 
-    border: 1px solid rgba(255,255,255,.15); 
+    border: 1px solid rgba(44, 37, 32, 0.15); 
     border-radius: 6px; 
     padding: 2px 8px; 
     font-family: 'JetBrains Mono'; 
-    color: rgba(255,255,255,.4); 
-    background: rgba(255,255,255,.05); 
+    color: var(--mid); 
+    background: rgba(44, 37, 32, 0.03); 
   }
   .slide-count { 
     position: absolute; 
@@ -231,9 +233,9 @@
     border-radius: 999px;
   }
   .dark-section .slide-count { 
-    color: rgba(255,255,255,.4); 
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.08);
+    color: var(--mid); 
+    background: rgba(44, 37, 32, 0.04);
+    border-color: rgba(44, 37, 32, 0.08);
   }
 
   /* TYPOGRAPHY */
@@ -258,11 +260,11 @@
   }
   .section-lead { font-size: 1.15rem; color: var(--mid); line-height: 1.65; max-width: 1000px; }
 
-  /* DARK SECTION overrides */
-  .dark-section { background: #070912; }
-  .dark-section .section-title { color: #fff; }
-  .dark-section .section-lead { color: rgba(255,255,255,.45); }
-  .dark-section .section-eyebrow { color: var(--emerald); }
+  /* DARK SECTION overrides (now warm sand) */
+  .dark-section { background: #ede8da; }
+  .dark-section .section-title { color: var(--ink); }
+  .dark-section .section-lead { color: var(--mid); }
+  .dark-section .section-eyebrow { color: var(--violet); }
 
   /* CONTENT WRAPPER */
   .content-body { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
@@ -288,20 +290,20 @@
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .dark-section .macos-window {
-    background: #111221;
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    background: #ffffff;
+    border-color: rgba(44, 37, 32, 0.08);
+    box-shadow: 0 30px 60px rgba(44,37,32,0.06);
   }
   .macos-window:hover {
     transform: translateY(-4px) scale(1.008);
     box-shadow: 0 40px 80px rgba(13, 15, 26, 0.12);
   }
   .dark-section .macos-window:hover {
-    box-shadow: 0 40px 80px rgba(0,0,0,0.45);
+    box-shadow: 0 40px 80px rgba(44, 37, 32, 0.12);
   }
   .macos-titlebar {
     background: rgba(0,0,0,0.02);
-    border-bottom: 1px solid rgba(13, 15, 26, 0.06);
+    border-bottom: 1px solid rgba(44, 37, 32, 0.06);
     padding: 0.8rem 1.2rem;
     display: flex;
     align-items: center;
@@ -309,8 +311,8 @@
     flex-shrink: 0;
   }
   .dark-section .macos-titlebar {
-    background: rgba(255,255,255,0.02);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.02);
+    border-bottom: 1px solid rgba(44, 37, 32, 0.06);
   }
   .macos-titlebar .dot {
     width: 11px;
@@ -337,9 +339,10 @@
     padding: 1.5rem;
     overflow: hidden;
     min-height: 0;
+    transition: transform 0.5s;
   }
   .dark-section .macos-content {
-    background: #0d0e17;
+    background: #ffffff;
   }
   .macos-content img {
     max-width: 100%;
@@ -353,9 +356,9 @@
 
   /* SIMPLE IMAGE BORDER */
   .simple-image-border {
-    border: 1px solid rgba(13, 15, 26, 0.08);
+    border: 1px solid rgba(44, 37, 32, 0.08);
     border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(13, 15, 26, 0.04);
+    box-shadow: 0 20px 40px rgba(44,37,32,0.04);
     background: #ffffff;
     padding: 8px;
     max-width: 100%;
@@ -365,21 +368,21 @@
   }
   .simple-image-border:hover {
     transform: translateY(-4px) scale(1.008);
-    box-shadow: 0 30px 60px rgba(13, 15, 26, 0.08);
+    box-shadow: 0 30px 60px rgba(44, 37, 32, 0.08);
   }
   .dark-section .simple-image-border {
-    background: #111221;
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    background: #ffffff;
+    border-color: rgba(44, 37, 32, 0.08);
+    box-shadow: 0 20px 40px rgba(44,37,32,0.04);
   }
   .dark-section .simple-image-border:hover {
-    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    box-shadow: 0 30px 60px rgba(44,37,32,0.08);
   }
 
   /* PREMIUM CARDS (GLASSMORPHISM INSPIRED) */
   .card { 
     background: rgba(255, 255, 255, 0.7); 
-    border: 1px solid rgba(13, 15, 26, 0.06);
+    border: 1px solid rgba(44, 37, 32, 0.06);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 16px; 
@@ -395,22 +398,22 @@
   .card.b { border-top-color: var(--blue); }
   .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(13,15,26,0.05);
+    box-shadow: 0 20px 40px rgba(44,37,32,0.05);
     background: rgba(255, 255, 255, 0.95);
   }
   .dark-section .card { 
-    background: rgba(255,255,255,0.03); 
-    border-color: rgba(255,255,255,0.05); 
+    background: rgba(255, 255, 255, 0.75); 
+    border-color: rgba(44, 37, 32, 0.06); 
   }
   .dark-section .card:hover {
-    background: rgba(255,255,255,0.06); 
-    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    background: rgba(255, 255, 255, 0.95); 
+    box-shadow: 0 20px 40px rgba(44,37,32,0.05);
   }
   
   .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.8rem; color: var(--ink); line-height: 1.3;}
   .card-desc { font-size: 1.05rem; color: var(--mid); line-height: 1.6; }
-  .dark-section .card-title { color: #fff; }
-  .dark-section .card-desc { color: rgba(255,255,255,.5); }
+  .dark-section .card-title { color: var(--ink); }
+  .dark-section .card-desc { color: var(--mid); }
 
   /* LISTS */
   .feature-list { list-style: none; display: flex; flex-direction: column; gap: 3.5vh; }
@@ -419,22 +422,22 @@
     font-size: 1.4rem; 
     line-height: 1; 
     padding: 10px;
-    background: rgba(127,119,221,0.08);
+    background: rgba(162,76,109,0.08);
     border-radius: 12px;
     color: var(--violet);
   }
   .dark-section .f-icon {
-    background: rgba(29,158,117,0.12);
-    color: var(--emerald);
+    background: rgba(162,76,109,0.08);
+    color: var(--violet);
   }
   .f-text h4 { font-size: 1.15rem; color: var(--ink); margin-bottom: 0.3rem; font-weight: 600; }
   .f-text p { font-size: 1.02rem; color: var(--mid); line-height: 1.55; }
-  .dark-section .f-text h4 { color: #fff; }
-  .dark-section .f-text p { color: rgba(255,255,255,.45); }
+  .dark-section .f-text h4 { color: var(--ink); }
+  .dark-section .f-text p { color: var(--mid); }
 
   /* HIGHLIGHT PILL */
   .highlight-box { 
-    background: rgba(127,119,221,.05); 
+    background: rgba(162,76,109,.05); 
     border-left: 5px solid var(--violet); 
     padding: 1.5rem 2.2rem; 
     border-radius: 0 16px 16px 0; 
@@ -443,23 +446,23 @@
     color: var(--ink); 
     line-height: 1.65; 
   }
-  .dark-section .highlight-box { background: rgba(127,119,221,.1); color: #fff; }
+  .dark-section .highlight-box { background: rgba(162,76,109,.05); color: var(--ink); }
   
   /* TERMINAL BOX FOR METRICS SHOWN AS CODE */
   .terminal-box { 
     font-family: 'JetBrains Mono', monospace; 
     background: var(--code-bg); 
     padding: 1.6rem; 
-    color: #a9b7c6; 
+    color: #e0d9d2; 
     font-size: 0.9rem; 
     line-height: 1.6; 
     white-space: pre-wrap; 
     flex: 1;
     overflow-y: auto;
   }
-  .terminal-box .green { color: #629755; }
-  .terminal-box .blue { color: #6897bb; }
-  .terminal-box .yellow { color: #cc7832; }
+  .terminal-box .green { color: #5af78e; }
+  .terminal-box .blue { color: #57b6f2; }
+  .terminal-box .yellow { color: #f2a657; }
 
   /* SMOOTH STAGGERED KEYNOTE TRANSITIONS */
   .slide-content .header-block,
@@ -517,7 +520,7 @@
     background: rgba(255,255,255,0.6); border-radius: 10px; padding: .8rem 1.1rem;
     min-width: 110px;
   }
-  .dark-section .cx-pill { background: rgba(255,255,255,.04); }
+  .dark-section .cx-pill { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(44, 37, 32, 0.05); }
   .cx-pill-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); font-weight: 600; }
   .cx-pill-val { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; }
   .cx-pill-val.v { color: var(--violet); }
@@ -525,19 +528,19 @@
   .cx-pill-val.c { color: var(--coral); }
   .cx-pill-val.b { color: var(--blue); }
   .cx-pill-sub { font-size: .68rem; color: var(--mid); }
-  .dark-section .cx-pill-sub { color: rgba(255,255,255,.25); }
-  .dark-section .cx-pill-label { color: rgba(255,255,255,.3); }
+  .dark-section .cx-pill-sub { color: var(--mid); }
+  .dark-section .cx-pill-label { color: var(--mid); }
 
   .stream-formula-block {
     background: var(--code-bg); border-radius: 10px;
     padding: 1rem 1.4rem;
     font-family: 'JetBrains Mono', monospace; font-size: .88rem;
-    color: #c9d1e8; line-height: 2;
+    color: #e0d9d2; line-height: 2;
     display: flex; flex-direction: column; gap: .1rem;
   }
   .stream-formula-block .f-label { font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.25); margin-bottom: -.2rem; }
-  .stream-formula-block .f-val { color: #a78bfa; }
-  .stream-formula-block .f-desc { font-size: .72rem; color: rgba(255,255,255,.35); font-family: 'Space Grotesk', sans-serif; margin-top: -.4rem; margin-bottom: .4rem; }
+  .stream-formula-block .f-val { color: #f2a657; }
+  .stream-formula-block .f-desc { font-size: .72rem; color: rgba(255,255,255,.4); font-family: 'Space Grotesk', sans-serif; margin-top: -.4rem; margin-bottom: .4rem; }
 
   .kw-group { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
   .kw-tag { font-family: 'JetBrains Mono', monospace; font-size: .72rem; padding: .25rem .7rem; border-radius: 6px; font-weight: 600; }
@@ -545,17 +548,17 @@
   .kw-tag.e { background: rgba(29,158,117,.12); color: var(--emerald); }
   .kw-tag.c { background: rgba(216,90,48,.12); color: var(--coral); }
   .kw-tag.b { background: rgba(63,111,174,.12); color: var(--blue); }
-  .kw-tag.w { background: rgba(255,255,255,.06); color: rgba(255,255,255,.6); }
+  .kw-tag.w { background: rgba(44,37,32,.06); color: var(--ink); }
 
   .ins { background: var(--card-bg); border: 1px solid var(--grid); border-radius: 12px; padding: 1.2rem 1.4rem; border-left: 3px solid var(--violet); }
-  .dark-section .ins { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.07); }
+  .dark-section .ins { background: rgba(255, 255, 255, 0.7); border-color: rgba(44, 37, 32, 0.08); }
   .ins.e { border-left-color: var(--emerald); }
   .ins.c { border-left-color: var(--coral); }
   .ins.b { border-left-color: var(--blue); }
   .ins-title { font-size: .82rem; font-weight: 700; margin-bottom: .35rem; color: var(--ink); }
-  .dark-section .ins-title { color: rgba(255,255,255,.85); }
+  .dark-section .ins-title { color: var(--ink); }
   .ins-desc { font-size: .78rem; color: var(--mid); line-height: 1.55; }
-  .dark-section .ins-desc { color: rgba(255,255,255,.45); }
+  .dark-section .ins-desc { color: var(--mid); }
 
   .stream-section { overflow-y: auto; overflow-x: hidden; justify-content: flex-start; padding-top: 80px; padding-bottom: 2rem; }
   .stream-section .container { height: auto; justify-content: flex-start; }
@@ -566,10 +569,10 @@
   .stream-badge.i { background: rgba(127,119,221,.15); color: var(--violet); }
 
   .stream-cmp { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 1rem; }
-  .stream-cmp th { background: rgba(255,255,255,.04); font-weight: 600; padding: .55rem .8rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,.08); font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; color: rgba(255,255,255,.35); }
-  .stream-cmp td { padding: .55rem .8rem; border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; line-height: 1.5; color: rgba(255,255,255,.7); }
+  .stream-cmp th { background: rgba(44, 37, 32, 0.04); font-weight: 600; padding: .55rem .8rem; text-align: left; border-bottom: 1px solid rgba(44, 37, 32, 0.1); font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; color: var(--mid); }
+  .stream-cmp td { padding: .55rem .8rem; border-bottom: 1px solid rgba(44, 37, 32, 0.06); vertical-align: top; line-height: 1.5; color: var(--ink); }
   .stream-cmp tr:last-child td { border-bottom: none; }
-  .stream-cmp td:first-child { color: rgba(255,255,255,.9); font-weight: 600; }
+  .stream-cmp td:first-child { color: var(--ink); font-weight: 600; }
 
   /* DGIM INTERACTIVE */
   .bit-stream-row { display: flex; gap: 2px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: .4rem; }
@@ -595,7 +598,7 @@
   .stream-step-t code { font-family: 'JetBrains Mono', monospace; font-size: .76rem; background: rgba(127,119,221,.12); color: #a78bfa; padding: .05em .35em; border-radius: 3px; }
   .graph-img { border-radius: 12px; overflow: hidden; border: 1px solid var(--grid); }
   .graph-img img { width: 100%; display: block; }
-  .dark-graph-img { border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); }
+  .dark-graph-img { border-radius: 12px; overflow: hidden; border: 1px solid rgba(44,37,32,0.08); }
   .dark-graph-img img { width: 100%; display: block; }
   .section-eyebrow-coral { font-family: 'JetBrains Mono', monospace; font-size: .75rem; letter-spacing: .2em; font-weight: 600; color: var(--coral); text-transform: uppercase; margin-bottom: .4rem; }
   .con-list-stream { list-style: none; margin-top: 1rem; }
@@ -701,7 +704,7 @@
         <div class="grid-2">
           <div class="col-visual" style="align-items: center;">
             <img id="img-stars-distribution" src="p2/parte1_1.png" alt="Distribución de Estrellas" class="simple-image-border" style="width: 100%;">
-            <div id="chart-stars-distribution" class="simple-image-border" style="width: 100%; height: 350px; display: none; background: #111221; border-color: rgba(255, 255, 255, 0.08); padding: 10px;"></div>
+            <div id="chart-stars-distribution" class="simple-image-border" style="width: 100%; height: 350px; display: none; padding: 10px;"></div>
           </div>
           <div class="col-text">
             <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
@@ -767,7 +770,7 @@
         <div class="grid-2">
           <div class="col-visual" style="align-items: center;">
             <img id="img-geographic-segments" src="p2/parte1_5.png" alt="Análisis Geográfico" class="simple-image-border" style="width: 100%;">
-            <div id="chart-geographic-segments" class="simple-image-border" style="width: 100%; height: 350px; display: none; background: #111221; border-color: rgba(255, 255, 255, 0.08); padding: 10px;"></div>
+            <div id="chart-geographic-segments" class="simple-image-border" style="width: 100%; height: 350px; display: none; padding: 10px;"></div>
           </div>
           <div class="col-text">
             <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
@@ -836,18 +839,8 @@
         <p class="section-lead">Contrariando el sugerido matemático (k=3), la decisión técnica basada en el "State of the Art" de recomendadores dictaminó imponer un filtro riguroso de <strong>10-core</strong>.</p>
       </div>
 
-      <div class="content-body">
-        <div class="highlight-box">
-          "Un usuario que retiene solo 3 reseñas carece de historia suficiente para calcular similitudes fiables frente a otros, perpetuando de forma irreversible el temido <strong>Cold Start</strong> en Recomendadores."
-        </div>
-        <div class="grid-2">
-          <div class="col-text">
-            <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
-              <div class="card-title">Construcción Extrema</div>
-              <div class="card-desc">Al forzar un subgrafo 10-core, la matriz perdió millones de filas basura. Todo usuario restante es un "Heavy User", garantizando fluidez perfecta para modelos matemáticos posteriores.</div>
-            </div>
-          </div>
-        </div>
+      <div class="content-body" style="align-items: center; justify-content: center; display: flex;">
+        <img src="k_10_core.png" alt="Filtro 10-core" class="simple-image-border" style="max-width: 100%; max-height: 500px; width: auto; object-fit: contain;">
       </div>
       <div class="slide-count">6 / 18</div>
     </div>
@@ -1599,28 +1592,28 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
       </div>
 
       <!-- Visualizador DGIM interactivo -->
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;">
-        <div style="font-size:.92rem;font-weight:700;color:#fff;margin-bottom:.3rem;">🎮 Visualizador DGIM — ingresa bits y observa los buckets</div>
-        <div style="font-size:.78rem;color:rgba(255,255,255,.35);margin-bottom:1rem;">Cada "1" crea un bucket nuevo. Los buckets se fusionan automáticamente cuando hay ≥ 3 del mismo tamaño.</div>
+      <div style="background:rgba(255,255,255,0.75);border:1px solid rgba(44,37,32,0.06);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:.3rem;">🎮 Visualizador DGIM — ingresa bits y observa los buckets</div>
+        <div style="font-size:.78rem;color:var(--mid);margin-bottom:1rem;">Cada "1" crea un bucket nuevo. Los buckets se fusionan automáticamente cuando hay ≥ 3 del mismo tamaño.</div>
         <div style="display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem;">
-          <select id="dgim-bit" style="background:#0d0f1a;color:#c9d1e8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:.4rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;width:130px;">
+          <select id="dgim-bit" style="background:#ffffff;color:var(--ink);border:1px solid rgba(44,37,32,0.15);border-radius:7px;padding:.4rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;width:130px;">
             <option value="1">bit = 1 (útil)</option>
             <option value="0">bit = 0</option>
           </select>
-          <input id="dgim-n" type="number" value="32" min="4" max="256" style="background:#0d0f1a;color:#c9d1e8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:.4rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;width:70px;"/>
-          <span style="font-size:.72rem;color:rgba(255,255,255,.3);">N =</span>
+          <input id="dgim-n" type="number" value="32" min="4" max="256" style="background:#ffffff;color:var(--ink);border:1px solid rgba(44,37,32,0.15);border-radius:7px;padding:.4rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;width:70px;"/>
+          <span style="font-size:.72rem;color:var(--mid);">N =</span>
           <button class="stream-btn" onclick="dgimAdd()">+ Bit</button>
           <button class="stream-btn em" onclick="dgimAuto()">▶ Auto (24 bits)</button>
           <button class="stream-btn mid" onclick="dgimReset()">Reiniciar</button>
         </div>
         <div style="margin-bottom:.5rem;">
-          <div style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:.35rem;font-weight:600;">Stream — más reciente a la izquierda</div>
-          <div class="bit-stream-row" id="dgim-stream"><span style="color:rgba(255,255,255,.15);font-size:.75rem;font-family:'JetBrains Mono',monospace;">sin bits aún</span></div>
+          <div style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:.35rem;font-weight:600;">Stream — más reciente a la izquierda</div>
+          <div class="bit-stream-row" id="dgim-stream"><span style="color:var(--mid);font-size:.75rem;font-family:'JetBrains Mono',monospace;">sin bits aún</span></div>
         </div>
-        <div style="background:#0d0e15;border-radius:10px;padding:.9rem 1.1rem;">
-          <div style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:.6rem;font-weight:600;">Buckets activos (más reciente → más antiguo)</div>
+        <div style="background:var(--code-bg);border-radius:10px;padding:.9rem 1.1rem;">
+          <div style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:.6rem;font-weight:600;">Buckets activos (más reciente → más antiguo)</div>
           <div class="bucket-row" id="dgim-buckets"><span style="color:rgba(255,255,255,.15);font-size:.78rem;font-family:'JetBrains Mono',monospace;">—</span></div>
-          <div id="dgim-estimate" style="margin-top:.8rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgba(255,255,255,.55);">Estimación: —</div>
+          <div id="dgim-estimate" style="margin-top:.8rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgba(255,255,255,.65);">Estimación: —</div>
         </div>
       </div>
       <div class="slide-count" style="color:rgba(255,255,255,.4);background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);">23 / 25</div>
@@ -1985,8 +1978,8 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
     });
 
     // Estilos comunes para layouts
-    const lightFont = { color: '#0d0f1a', family: 'Space Grotesk', size: 10 };
-    const darkFont = { color: '#ffffff', family: 'Space Grotesk', size: 10 };
+    const lightFont = { color: '#2c2520', family: 'Space Grotesk', size: 10 };
+    const darkFont = { color: '#2c2520', family: 'Space Grotesk', size: 10 };
     
     // Gráfico 1: Review Count (Slide 1 - Light)
     // Convertimos x a escala logarítmica linealizada para mantener el ancho de barra uniforme en Plotly.js
@@ -1995,7 +1988,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
       x: logX,
       y: yelpEdaData.reviewCountHist.y,
       type: 'bar',
-      marker: { color: '#7F77DD' },
+      marker: { color: '#a24c6d' },
       hovertemplate: 'Rango: %{customdata:.0f} - %{text:.0f} reseñas<br>Frecuencia: %{y:,}<extra></extra>',
       customdata: yelpEdaData.reviewCountHist.edges.slice(0, -1),
       text: yelpEdaData.reviewCountHist.edges.slice(1),
@@ -2045,7 +2038,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
       name: 'Reseñas',
       xaxis: 'x1',
       yaxis: 'y1',
-      marker: { color: '#7F77DD' }
+      marker: { color: '#d35430' }
     };
     const busStarsTrace = {
       x: yelpEdaData.businessStars.x,
@@ -2054,14 +2047,14 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
       name: 'Negocios',
       xaxis: 'x2',
       yaxis: 'y2',
-      marker: { color: '#1D9E75' }
+      marker: { color: '#4d7a5b' }
     };
     Plotly.newPlot('chart-stars-distribution', [revStarsTrace, busStarsTrace], {
       grid: { rows: 1, columns: 2, pattern: 'independent' },
-      xaxis1: { title: { text: 'Estrellas', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
-      yaxis1: { title: { text: 'Cantidad', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
-      xaxis2: { title: { text: 'Estrellas Promedio', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
-      yaxis2: { title: { text: 'Frecuencia', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
+      xaxis1: { title: { text: 'Estrellas', font: darkFont }, gridcolor: '#e8e2d5', font: darkFont },
+      yaxis1: { title: { text: 'Cantidad', font: darkFont }, gridcolor: '#e8e2d5', font: darkFont },
+      xaxis2: { title: { text: 'Estrellas Promedio', font: darkFont }, gridcolor: '#e8e2d5', font: darkFont },
+      yaxis2: { title: { text: 'Frecuencia', font: darkFont }, gridcolor: '#e8e2d5', font: darkFont },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
       font: darkFont,
@@ -2095,7 +2088,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
       name: 'Negocios',
       xaxis: 'x1',
       yaxis: 'y1',
-      marker: { color: '#3F6FAE' }
+      marker: { color: '#3f6f96' }
     };
     const geoTraces = [stateBarTrace];
     yelpEdaData.stateStats.states.forEach(state => {
@@ -2105,16 +2098,16 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
         name: `Dist. ${state}`,
         xaxis: 'x2',
         yaxis: 'y2',
-        marker: { color: '#7F77DD' },
+        marker: { color: '#a24c6d' },
         showlegend: false
       });
     });
     Plotly.newPlot('chart-geographic-segments', geoTraces, {
       grid: { rows: 1, columns: 2, pattern: 'independent' },
-      xaxis1: { title: { text: 'Estado', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
-      yaxis1: { title: { text: 'Cantidad', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
-      xaxis2: { title: { text: 'Estado', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
-      yaxis2: { title: { text: 'Estrellas', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff', range: [0.8, 5.2] },
+      xaxis1: { title: { text: 'Estado', font: darkFont }, gridcolor: '#e8e2d5', font: darkFont },
+      yaxis1: { title: { text: 'Cantidad', font: darkFont }, gridcolor: '#e8e2d5', font: darkFont },
+      xaxis2: { title: { text: 'Estado', font: darkFont }, gridcolor: '#e8e2d5', font: darkFont },
+      yaxis2: { title: { text: 'Estrellas', font: darkFont }, gridcolor: '#e8e2d5', font: darkFont, range: [0.8, 5.2] },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
       font: darkFont,
@@ -2219,7 +2212,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
     node.append('circle')
       .attr('r', d => sizeScale(d.pagerank))
       .attr('fill', d => getColor(d.community))
-      .attr('stroke', d => d.type === 'business' ? '#0d0f1a' : '#ffffff')
+      .attr('stroke', d => d.type === 'business' ? '#2c2520' : '#ffffff')
       .attr('stroke-width', d => d.type === 'business' ? 1.5 : 0.8)
       .attr('stroke-dasharray', d => d.type === 'business' ? 'none' : '2,2');
       
