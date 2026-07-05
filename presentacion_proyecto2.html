@@ -351,6 +351,31 @@
     transition: transform 0.5s;
   }
 
+  /* SIMPLE IMAGE BORDER */
+  .simple-image-border {
+    border: 1px solid rgba(13, 15, 26, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(13, 15, 26, 0.04);
+    background: #ffffff;
+    padding: 8px;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .simple-image-border:hover {
+    transform: translateY(-4px) scale(1.008);
+    box-shadow: 0 30px 60px rgba(13, 15, 26, 0.08);
+  }
+  .dark-section .simple-image-border {
+    background: #111221;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  }
+  .dark-section .simple-image-border:hover {
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+  }
+
   /* PREMIUM CARDS (GLASSMORPHISM INSPIRED) */
   .card { 
     background: rgba(255, 255, 255, 0.7); 
@@ -580,6 +605,11 @@
   .con-text { font-size: .88rem; color: rgba(255,255,255,.6); line-height: 1.65; }
   .con-text strong { color: rgba(255,255,255,.9); }
 </style>
+<script src="https://cdn.plot.ly/plotly-2.24.1.min.js" charset="utf-8"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="p2/presentation_data.js" defer></script>
+<script src="p2/graph_data.js" defer></script>
+<script src="p2/elbow_data.js" defer></script>
 </head>
 <body>
 
@@ -649,36 +679,9 @@
       </div>
 
       <div class="content-body">
-        <div class="grid-2">
-          <div class="col-text">
-            <ul class="feature-list">
-              <li class="feature-item">
-                <div class="f-icon">💧</div>
-                <div class="f-text">
-                  <h4>Técnica: Reservoir Sampling</h4>
-                  <p>Iteramos el flujo masivo reteniendo una muestra estocásticamente perfecta (100,000 reseñas), sin necesidad de cargar todo el archivo ni desbordar la memoria principal.</p>
-                </div>
-              </li>
-              <li class="feature-item">
-                <div class="f-icon">📉</div>
-                <div class="f-text">
-                  <h4>Hallazgo: La Ley de Potencias</h4>
-                  <p>La red de interacción de Yelp sigue una distribución "Power Law". La inmensa mayoría de los usuarios escribe solo 1 reseña, lo cual introduce un sesgo extremo de dispersión.</p>
-                </div>
-              </li>
-            </ul>
-          </div>
-          <div class="col-visual">
-            <div class="macos-window">
-              <div class="macos-titlebar">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title">frecuencias_review_count.png</span>
-              </div>
-              <div class="macos-content">
-                <img src="p2/parte1_2.png" alt="Histograma de Frecuencias">
-              </div>
-            </div>
-          </div>
+        <div class="col-visual" style="align-items: center; width: 100%;">
+          <img id="img-review-count" src="p2/parte1_2.png" alt="Histograma de Frecuencias" class="simple-image-border" style="width: 100%; max-height: 420px; object-fit: contain;">
+          <div id="chart-review-count" class="simple-image-border" style="width: 100%; height: 420px; display: none; background: white; padding: 10px;"></div>
         </div>
       </div>
       <div class="slide-count">1 / 18</div>
@@ -696,16 +699,9 @@
 
       <div class="content-body">
         <div class="grid-2">
-          <div class="col-visual">
-            <div class="macos-window">
-              <div class="macos-titlebar">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title">distribucion_estrellas.png</span>
-              </div>
-              <div class="macos-content">
-                <img src="p2/parte1_1.png" alt="Distribución de Estrellas">
-              </div>
-            </div>
+          <div class="col-visual" style="align-items: center;">
+            <img id="img-stars-distribution" src="p2/parte1_1.png" alt="Distribución de Estrellas" class="simple-image-border" style="width: 100%;">
+            <div id="chart-stars-distribution" class="simple-image-border" style="width: 100%; height: 350px; display: none; background: #111221; border-color: rgba(255, 255, 255, 0.08); padding: 10px;"></div>
           </div>
           <div class="col-text">
             <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
@@ -748,16 +744,9 @@
               </li>
             </ul>
           </div>
-          <div class="col-visual">
-            <div class="macos-window">
-              <div class="macos-titlebar">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title">top_categorias.png</span>
-              </div>
-              <div class="macos-content">
-                <img src="p2/parte1_3.png" alt="Top Categorías">
-              </div>
-            </div>
+          <div class="col-visual" style="align-items: center;">
+            <img id="img-top-categories" src="p2/parte1_3.png" alt="Top Categorías" class="simple-image-border" style="width: 100%;">
+            <div id="chart-top-categories" class="simple-image-border" style="width: 100%; height: 350px; display: none; background: white; padding: 10px;"></div>
           </div>
         </div>
       </div>
@@ -776,16 +765,9 @@
 
       <div class="content-body">
         <div class="grid-2">
-          <div class="col-visual">
-            <div class="macos-window">
-              <div class="macos-titlebar">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title">segmentos_estados.png</span>
-              </div>
-              <div class="macos-content">
-                <img src="p2/parte1_5.png" alt="Análisis Geográfico">
-              </div>
-            </div>
+          <div class="col-visual" style="align-items: center;">
+            <img id="img-geographic-segments" src="p2/parte1_5.png" alt="Análisis Geográfico" class="simple-image-border" style="width: 100%;">
+            <div id="chart-geographic-segments" class="simple-image-border" style="width: 100%; height: 350px; display: none; background: #111221; border-color: rgba(255, 255, 255, 0.08); padding: 10px;"></div>
           </div>
           <div class="col-text">
             <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.5rem 0;">
@@ -835,16 +817,9 @@
               </li>
             </ul>
           </div>
-          <div class="col-visual">
-            <div class="macos-window">
-              <div class="macos-titlebar">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title">codo_kcore_plot.png</span>
-              </div>
-              <div class="macos-content">
-                <img src="p2/parte1_6.png" alt="Codo K-core">
-              </div>
-            </div>
+          <div class="col-visual" style="align-items: center;">
+            <img id="img-kcore-elbow" src="p2/parte1_6.png" alt="Codo K-core" class="simple-image-border" style="width: 100%;">
+            <div id="chart-kcore-elbow" class="simple-image-border" style="width: 100%; height: 380px; display: none; background: white; padding: 10px;"></div>
           </div>
         </div>
       </div>
@@ -888,7 +863,7 @@
       </div>
 
       <div class="content-body">
-        <div class="grid-2">
+        <div class="grid-2" style="grid-template-columns: 3fr 7fr;">
           <div class="col-text">
             <ul class="feature-list">
               <li class="feature-item">
@@ -907,15 +882,11 @@
               </li>
             </ul>
           </div>
-          <div class="col-visual">
-            <div class="macos-window">
-              <div class="macos-titlebar">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title">grafo_louvain_comunidades.png</span>
-              </div>
-              <div class="macos-content">
-                <img src="p2/comunidades.png" alt="Grafo de Comunidades">
-              </div>
+          <div class="col-visual" style="align-items: center; position: relative;">
+            <img id="img-communities-graph" src="p2/comunidades.png" alt="Grafo de Comunidades" class="simple-image-border" style="width: 100%;">
+            <div id="chart-communities-graph" class="simple-image-border" style="width: 100%; height: 420px; display: none; background: white; padding: 0; position: relative; overflow: hidden;">
+              <!-- Tooltip flotante interno del grafo -->
+              <div id="graph-tooltip" style="position: absolute; display: none; background: rgba(13,15,26,0.95); color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.72rem; font-family: 'Space Grotesk', sans-serif; pointer-events: none; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.2); line-height: 1.45; border: 1px solid rgba(255,255,255,0.15);"></div>
             </div>
           </div>
         </div>
@@ -941,22 +912,49 @@
                 <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
                 <span class="window-title">terminal - rank_metrics.sh</span>
               </div>
-              <div class="terminal-box">
-<span class="yellow">=== METRICAS DE COMPARACIÓN DE RANKING ===</span>
-Correlación de Spearman (Negocios): <span class="blue">0.463508</span>
-Solapamiento en el Top 50 Negocios: <span class="green">34.0%</span>
-Correlación de Spearman (Usuarios):  <span class="blue">-0.005392</span>
-Solapamiento en el Top 50 Usuarios:  <span class="green">0.0%</span>
+              <div class="terminal-box" style="white-space: normal; display: flex; flex-direction: column; gap: 1rem; padding: 1.2rem; background: var(--code-bg); text-align: left;">
+                
+                <!-- Prompt de terminal simulado -->
+                <div style="font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px; color: #888;">
+                  <span class="green">[yelp-analytics] $</span> python compare_rankings.py --verbose
+                </div>
 
-<span class="yellow">=== TOP 3 AUTHORITIES (HITS) ===</span>
-1. Reading Terminal Market (Philadelphia)
-2. El Vez (Philadelphia)
-3. Zahav (Philadelphia)
+                <!-- Bloque 1: Métricas en formato de Panel CLI -->
+                <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 10px; background: rgba(255,255,255,0.01);">
+                  <div class="yellow" style="font-weight: 600; font-size: 0.8rem; margin-bottom: 8px;">📊 METRICAS DE COMPARACIÓN DE RANKING</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 15px; font-size: 0.78rem;">
+                    <div>Correlación de Spearman (Negocios): <span class="blue" style="font-weight: 600;">0.463508</span></div>
+                    <div>Solapamiento en el Top 50 Negocios: <span class="green" style="font-weight: 600;">34.0%</span></div>
+                    <div>Correlación de Spearman (Usuarios):  <span class="blue" style="font-weight: 600;">-0.005392</span></div>
+                    <div>Solapamiento en el Top 50 Usuarios:  <span class="green" style="font-weight: 600;">0.0%</span></div>
+                  </div>
+                </div>
 
-<span class="yellow">=== TOP 3 INFLUYENTES (PAGERANK) ===</span>
-1. Reading Terminal Market (Philadelphia)
-2. Acme Oyster House (New Orleans)
-3. Hattie B’s Hot Chicken (Nashville)
+                <!-- Bloque 2: Top Rankings en columnas lado a lado -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  
+                  <!-- HITS -->
+                  <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 10px; background: rgba(255,255,255,0.01);">
+                    <div class="yellow" style="font-weight: 600; font-size: 0.78rem; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">🏆 TOP 3 AUTHORITIES (HITS)</div>
+                    <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem;">
+                      <div>1. Reading Terminal <span style="color: #6b6d8a;">(PA)</span></div>
+                      <div>2. El Vez <span style="color: #6b6d8a;">(PA)</span></div>
+                      <div>3. Zahav <span style="color: #6b6d8a;">(PA)</span></div>
+                    </div>
+                  </div>
+
+                  <!-- PageRank -->
+                  <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 10px; background: rgba(255,255,255,0.01);">
+                    <div class="yellow" style="font-weight: 600; font-size: 0.78rem; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">📈 TOP 3 INFLUYENTES (PR)</div>
+                    <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem;">
+                      <div>1. Reading Terminal <span style="color: #6b6d8a;">(PA)</span></div>
+                      <div>2. Acme Oyster House <span style="color: #6b6d8a;">(LA)</span></div>
+                      <div>3. Hattie B’s Chicken <span style="color: #6b6d8a;">(TN)</span></div>
+                    </div>
+                  </div>
+
+                </div>
+
               </div>
             </div>
           </div>
@@ -1860,6 +1858,453 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
   }
 
   renderDGIM();
+
+  // ── INICIALIZACIÓN DE GRÁFICOS INTERACTIVOS (PLOTLY) ──
+  function initPlotlyCharts() {
+    // Cargar Gráfico de Codo K-Core si están los datos disponibles (Slide 5 - Light)
+    if (typeof yelpElbowData !== 'undefined') {
+      const imgElbow = document.getElementById('img-kcore-elbow');
+      const chartElbow = document.getElementById('chart-kcore-elbow');
+      if (imgElbow && chartElbow) {
+        imgElbow.style.display = 'none';
+        chartElbow.style.display = 'block';
+      }
+      
+      const lightFont = { color: '#0d0f1a', family: 'Space Grotesk', size: 10 };
+      const xVals = yelpElbowData.k_values;
+      const usersY = yelpElbowData.users_pct;
+      const reviewsY = yelpElbowData.reviews_pct;
+      const elbow = yelpElbowData.elbow;
+      
+      const traceUsers = {
+        x: xVals,
+        y: usersY,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '% Usuarios Retenidos',
+        marker: { color: '#D85A30', symbol: 'circle', size: 8 },
+        line: { width: 2.5 }
+      };
+      
+      const traceReviews = {
+        x: xVals,
+        y: reviewsY,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '% Reseñas Retenidas',
+        marker: { color: '#1D9E75', symbol: 'triangle-up', size: 8 },
+        line: { width: 2.5 }
+      };
+      
+      // Recta secante
+      const traceSecant = {
+        x: [elbow.secant_start[0], elbow.secant_end[0]],
+        y: [elbow.secant_start[1], elbow.secant_end[1]],
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Secante',
+        line: { color: 'rgba(107, 109, 138, 0.4)', dash: 'dash', width: 1.5 }
+      };
+      
+      // Línea ortogonal (distancia máxima)
+      const x1 = elbow.secant_start[0];
+      const y1 = elbow.secant_start[1];
+      const x2 = elbow.secant_end[0];
+      const y2 = elbow.secant_end[1];
+      const m = (y2 - y1) / (x2 - x1);
+      const b = y1 - m * x1;
+      const ySecantAtElbow = m * elbow.k + b;
+      
+      const traceOrtho = {
+        x: [elbow.k, elbow.k],
+        y: [ySecantAtElbow, elbow.pct],
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Distancia Ortogonal',
+        line: { color: '#7F77DD', width: 2, dash: 'dot' },
+        showlegend: false
+      };
+      
+      const traceElbowPoint = {
+        x: [elbow.k],
+        y: [elbow.pct],
+        type: 'scatter',
+        mode: 'markers',
+        name: 'Codo Óptimo',
+        marker: { color: '#7F77DD', size: 10, line: { color: '#0d0f1a', width: 1.5 } },
+        showlegend: false
+      };
+      
+      const layoutElbow = {
+        xaxis: { title: { text: 'Umbral k (Mínimo de reseñas por usuario)', font: lightFont }, gridcolor: '#e0dff0', font: lightFont, tickvals: xVals },
+        yaxis: { title: { text: '% de Datos Conservados', font: lightFont }, gridcolor: '#e0dff0', font: lightFont, range: [-5, 108] },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: lightFont,
+        showlegend: true,
+        legend: { orientation: 'h', y: -0.2, x: 0.15, font: lightFont },
+        margin: { t: 20, b: 60, l: 50, r: 20 },
+        annotations: [{
+          x: elbow.k,
+          y: elbow.pct,
+          xref: 'x',
+          yref: 'y',
+          text: `Codo (k=${elbow.k})`,
+          showarrow: true,
+          arrowhead: 2,
+          arrowcolor: '#7F77DD',
+          ax: 40,
+          ay: -40,
+          font: { family: 'Space Grotesk', size: 11, color: '#7F77DD' },
+          bgcolor: 'white',
+          bordercolor: '#7F77DD',
+          borderwidth: 1,
+          borderpad: 4
+        }]
+      };
+      
+      Plotly.newPlot('chart-kcore-elbow', [traceUsers, traceReviews, traceSecant, traceOrtho, traceElbowPoint], layoutElbow, {responsive: true, displayModeBar: false});
+    }
+
+    if (typeof yelpEdaData === 'undefined') {
+      console.log("No se encontraron los datos del EDA interactivo. Usando imágenes estáticas de respaldo.");
+      return;
+    }
+    
+    console.log("Datos de yelpEdaData cargados correctamente. Activando gráficos interactivos.");
+    
+    // 1. Mostrar contenedores de gráficos y ocultar imágenes
+    const ids = ['review-count', 'stars-distribution', 'top-categories', 'geographic-segments'];
+    ids.forEach(id => {
+      const img = document.getElementById(`img-${id}`);
+      const chart = document.getElementById(`chart-${id}`);
+      if (img && chart) {
+        img.style.display = 'none';
+        chart.style.display = 'block';
+      }
+    });
+
+    // Estilos comunes para layouts
+    const lightFont = { color: '#0d0f1a', family: 'Space Grotesk', size: 10 };
+    const darkFont = { color: '#ffffff', family: 'Space Grotesk', size: 10 };
+    
+    // Gráfico 1: Review Count (Slide 1 - Light)
+    // Convertimos x a escala logarítmica linealizada para mantener el ancho de barra uniforme en Plotly.js
+    const logX = yelpEdaData.reviewCountHist.x.map(val => Math.log10(val));
+    const histData = {
+      x: logX,
+      y: yelpEdaData.reviewCountHist.y,
+      type: 'bar',
+      marker: { color: '#7F77DD' },
+      hovertemplate: 'Rango: %{customdata:.0f} - %{text:.0f} reseñas<br>Frecuencia: %{y:,}<extra></extra>',
+      customdata: yelpEdaData.reviewCountHist.edges.slice(0, -1),
+      text: yelpEdaData.reviewCountHist.edges.slice(1),
+      textposition: 'none'
+    };
+    // Calcular el rango dinámico de ticks basado en los datos
+    const maxLogVal = Math.ceil(Math.max(...logX));
+    const tickvals = [];
+    const ticktext = [];
+    for (let i = 0; i <= maxLogVal; i++) {
+      tickvals.push(i);
+      if (i === 0) ticktext.push('1');
+      else if (i === 1) ticktext.push('10');
+      else if (i === 2) ticktext.push('100');
+      else if (i === 3) ticktext.push('1k');
+      else if (i === 4) ticktext.push('10k');
+      else ticktext.push('10^' + i);
+    }
+
+    Plotly.newPlot('chart-review-count', [histData], {
+      xaxis: { 
+        type: 'linear', 
+        title: { text: 'Conteo de Reseñas', font: lightFont }, 
+        gridcolor: '#e0dff0', 
+        font: lightFont,
+        tickvals: tickvals,
+        ticktext: ticktext
+      },
+      yaxis: { title: { text: 'Frecuencia', font: lightFont }, gridcolor: '#e0dff0', font: lightFont },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: lightFont,
+      dragmode: 'zoom',
+      margin: { t: 10, b: 40, l: 50, r: 20 }
+    }, {
+      responsive: true, 
+      displayModeBar: true,
+      scrollZoom: true,
+      modeBarButtonsToRemove: ['lasso2d', 'select2d']
+    });
+
+    // Gráfico 2: Stars Distribution (Slide 2 - Dark)
+    const revStarsTrace = {
+      x: yelpEdaData.reviewStars.x,
+      y: yelpEdaData.reviewStars.y,
+      type: 'bar',
+      name: 'Reseñas',
+      xaxis: 'x1',
+      yaxis: 'y1',
+      marker: { color: '#7F77DD' }
+    };
+    const busStarsTrace = {
+      x: yelpEdaData.businessStars.x,
+      y: yelpEdaData.businessStars.y,
+      type: 'bar',
+      name: 'Negocios',
+      xaxis: 'x2',
+      yaxis: 'y2',
+      marker: { color: '#1D9E75' }
+    };
+    Plotly.newPlot('chart-stars-distribution', [revStarsTrace, busStarsTrace], {
+      grid: { rows: 1, columns: 2, pattern: 'independent' },
+      xaxis1: { title: { text: 'Estrellas', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
+      yaxis1: { title: { text: 'Cantidad', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
+      xaxis2: { title: { text: 'Estrellas Promedio', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
+      yaxis2: { title: { text: 'Frecuencia', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: darkFont,
+      showlegend: true,
+      legend: { orientation: 'h', y: -0.2, x: 0.15, font: darkFont },
+      margin: { t: 20, b: 70, l: 50, r: 20 }
+    }, {responsive: true, displayModeBar: false});
+
+    // Gráfico 3: Top Categories (Slide 3 - Light)
+    const catTrace = {
+      x: yelpEdaData.topCategories.counts.slice().reverse(),
+      y: yelpEdaData.topCategories.names.slice().reverse(),
+      type: 'bar',
+      orientation: 'h',
+      marker: { color: '#D85A30' }
+    };
+    Plotly.newPlot('chart-top-categories', [catTrace], {
+      xaxis: { title: { text: 'Cantidad de Negocios', font: lightFont }, gridcolor: '#e0dff0', font: lightFont },
+      yaxis: { automargin: true, font: lightFont },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: lightFont,
+      margin: { t: 10, b: 40, l: 120, r: 20 }
+    }, {responsive: true, displayModeBar: false});
+
+    // Gráfico 4: Geographic Segments (Slide 4 - Dark)
+    const stateBarTrace = {
+      x: yelpEdaData.stateStats.states,
+      y: yelpEdaData.stateStats.counts,
+      type: 'bar',
+      name: 'Negocios',
+      xaxis: 'x1',
+      yaxis: 'y1',
+      marker: { color: '#3F6FAE' }
+    };
+    const geoTraces = [stateBarTrace];
+    yelpEdaData.stateStats.states.forEach(state => {
+      geoTraces.push({
+        y: yelpEdaData.stateStats.boxplot[state],
+        type: 'box',
+        name: `Dist. ${state}`,
+        xaxis: 'x2',
+        yaxis: 'y2',
+        marker: { color: '#7F77DD' },
+        showlegend: false
+      });
+    });
+    Plotly.newPlot('chart-geographic-segments', geoTraces, {
+      grid: { rows: 1, columns: 2, pattern: 'independent' },
+      xaxis1: { title: { text: 'Estado', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
+      yaxis1: { title: { text: 'Cantidad', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
+      xaxis2: { title: { text: 'Estado', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff' },
+      yaxis2: { title: { text: 'Estrellas', font: darkFont }, gridcolor: 'rgba(255,255,255,0.1)', font: darkFont, tickcolor: '#fff', range: [0.8, 5.2] },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: darkFont,
+      showlegend: true,
+      legend: { orientation: 'h', y: -0.2, x: 0.15, font: darkFont },
+      margin: { t: 20, b: 70, l: 60, r: 20 }
+    }, {responsive: true, displayModeBar: false});
+  }
+
+  // ── INICIALIZACIÓN DEL GRAFO INTERACTIVO DE LOUVAIN CON D3.js ──
+  function initD3Graph() {
+    if (typeof yelpGraphData === 'undefined') {
+      console.log("No se encontraron los datos del grafo. Usando comunidades.png estático.");
+      return;
+    }
+    
+    console.log("Datos de yelpGraphData cargados correctamente. Inicializando D3.js Force Graph.");
+    
+    // Ocultar imagen estática y mostrar contenedor
+    const img = document.getElementById('img-communities-graph');
+    const chart = document.getElementById('chart-communities-graph');
+    if (img && chart) {
+      img.style.display = 'none';
+      chart.style.display = 'block';
+    } else {
+      return;
+    }
+    
+    const width = chart.clientWidth;
+    const height = chart.clientHeight || 380;
+    
+    // Limpiar contenedor por si acaso
+    d3.select('#chart-communities-graph').selectAll('svg').remove();
+    
+    // Crear el SVG con comportamiento de Zoom/Pan
+    const svg = d3.select('#chart-communities-graph')
+      .append('svg')
+      .attr('width', width)
+      .attr('height', height)
+      .style('cursor', 'grab');
+      
+    const gContainer = svg.append('g');
+    
+    // Habilitar Zoom/Pan
+    const zoom = d3.zoom()
+      .scaleExtent([0.15, 6])
+      .on('zoom', (event) => {
+        gContainer.attr('transform', event.transform);
+      });
+      
+    svg.call(zoom);
+    
+    // Copias de nodos y enlaces
+    const nodes = yelpGraphData.nodes.map(d => Object.create(d));
+    const links = yelpGraphData.links.map(d => Object.create(d));
+    
+    // Mapeo de colores estéticos para las 5 comunidades (basado en el código de Python)
+    const colorMap = ['#FF4C4C', '#4C99FF', '#4CFF4C', '#FFCC00', '#9933FF'];
+    const getColor = (commId) => {
+      const idx = yelpGraphData.top_communities.indexOf(commId);
+      if (idx !== -1 && idx < colorMap.length) {
+        return colorMap[idx];
+      }
+      return '#9ca3af'; // Gris si es una comunidad externa
+    };
+    
+    // Configurar simulación física
+    const simulation = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(links).id(d => d.id).distance(35))
+      .force('charge', d3.forceManyBody().strength(-30))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('x', d3.forceX(width / 2).strength(0.08))
+      .force('y', d3.forceY(height / 2).strength(0.08));
+      
+    // Dibujar aristas
+    const link = gContainer.append('g')
+      .attr('stroke', '#bbb')
+      .attr('stroke-opacity', 0.25)
+      .selectAll('line')
+      .data(links)
+      .join('line')
+      .attr('stroke-width', 1.0);
+      
+    // Escala de tamaños según PageRank (o grado si PR no está escalado)
+    const prExtent = d3.extent(nodes, d => d.pagerank);
+    const sizeScale = d3.scaleLinear()
+      .domain(prExtent[0] === prExtent[1] ? [0, 1] : prExtent)
+      .range([4, 14]);
+      
+    const tooltip = d3.select('#graph-tooltip');
+    
+    // Dibujar nodos
+    const node = gContainer.append('g')
+      .selectAll('.node')
+      .data(nodes)
+      .join('g')
+      .attr('class', 'node')
+      .style('cursor', 'pointer')
+      .call(drag(simulation));
+      
+    // Representación visual: Círculos con bordes diferenciados para Usuarios y Negocios
+    node.append('circle')
+      .attr('r', d => sizeScale(d.pagerank))
+      .attr('fill', d => getColor(d.community))
+      .attr('stroke', d => d.type === 'business' ? '#0d0f1a' : '#ffffff')
+      .attr('stroke-width', d => d.type === 'business' ? 1.5 : 0.8)
+      .attr('stroke-dasharray', d => d.type === 'business' ? 'none' : '2,2');
+      
+    // Eventos hover para información interactiva
+    node.on('mouseover', function(event, d) {
+      d3.select(this).select('circle')
+        .transition().duration(150)
+        .attr('r', sizeScale(d.pagerank) * 1.3)
+        .attr('stroke-width', 2.5);
+        
+      tooltip.style('display', 'block')
+        .html(`
+          <strong style="font-size:0.78rem; color:#fff;">${d.label}</strong><br>
+          <span style="font-size:0.62rem; color:#9ca3af; font-family:'JetBrains Mono';">ID: ${d.id}</span><br>
+          <hr style="border:0; border-top:1px solid rgba(255,255,255,0.15); margin:5px 0;">
+          • Tipo: <strong>${d.type === 'user' ? 'Usuario (User)' : 'Negocio (Business)'}</strong><br>
+          • Comunidad: <strong style="color:${getColor(d.community)};">Top Comm #${d.community}</strong><br>
+          • Grado: <strong>${d.degree} enlaces</strong><br>
+          • PageRank: <strong>${d.pagerank.toFixed(5)}</strong><br>
+          • Authority Score: <strong>${d.authority.toFixed(5)}</strong>
+        `);
+    })
+    .on('mousemove', function(event) {
+      const rect = chart.getBoundingClientRect();
+      const x = event.clientX - rect.left + 15;
+      const y = event.clientY - rect.top + 15;
+      
+      tooltip
+        .style('left', `${x}px`)
+        .style('top', `${y}px`);
+    })
+    .on('mouseout', function(event, d) {
+      d3.select(this).select('circle')
+        .transition().duration(150)
+        .attr('r', sizeScale(d.pagerank))
+        .attr('stroke-width', d => d.type === 'business' ? 1.5 : 0.8);
+        
+      tooltip.style('display', 'none');
+    });
+    
+    // Actualizar coordenadas en cada tick
+    simulation.on('tick', () => {
+      link
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x)
+        .attr('y2', d => d.target.y);
+        
+      node
+        .attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+    
+    // Funciones drag
+    function drag(sim) {
+      function dragstarted(event) {
+        if (!event.active) sim.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+        svg.style('cursor', 'grabbing');
+      }
+      
+      function dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+      }
+      
+      function dragended(event) {
+        if (!event.active) sim.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+        svg.style('cursor', 'grab');
+      }
+      
+      return d3.drag()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended);
+    }
+  }
+
+  // Llamar al cargar el DOM
+  window.addEventListener('DOMContentLoaded', () => {
+    initPlotlyCharts();
+    initD3Graph();
+  });
 </script>
 </body>
 </html>
