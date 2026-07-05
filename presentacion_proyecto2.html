@@ -976,20 +976,29 @@
         <p class="section-lead">El algoritmo de Louvain detectó 228 comunidades. Una modularidad de 0.779 demuestra que las relaciones comerciales de Yelp están extremadamente fragmentadas.</p>
       </div>
 
-      <div class="content-body">
-        <div class="grid-2">
-          <div class="col-text">
-            <div class="card b" style="margin-bottom:1rem; border-top-color: var(--blue);">
+      <div class="content-body" style="height:100%;">
+        <div style="display:flex; gap:1.5rem; height:100%;">
+
+          <div style="flex:1; display:flex; flex-direction:column; gap:0.75rem;">
+            <div class="card b" style="border-top-color: var(--blue); flex-shrink:0;">
               <div class="card-title">Fuerza Geográfica Inquebrantable</div>
-              <div class="card-desc">Las comunidades principales se alínean directamente con ciudades específicas (Comunidad 0: Philadelphia, Comunidad 1: Saint Louis, Comunidad 2: Reno/Sparks). Esto revela que la proximidad física es la fuerza gravitacional principal de la red.</div>
+              <div class="card-desc">Las comunidades principales se alínean directamente con ciudades específicas (Comunidad 0: Philadelphia, Comunidad 1: Saint Louis, Comunidad 2: Reno/Sparks). La proximidad física es la fuerza gravitacional principal de la red.</div>
+            </div>
+            <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:6px;">
+              <img src="fuerza_geografica.png" alt="Fuerza Geográfica" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
-          <div class="col-text">
-            <div class="card c" style="border-top-color: var(--coral);">
+
+          <div style="flex:1; display:flex; flex-direction:column; gap:0.75rem;">
+            <div class="card c" style="border-top-color: var(--coral); flex-shrink:0;">
               <div class="card-title">Subcomunidades Temáticas de Nicho</div>
-              <div class="card-desc">En metrópolis densas como Philadelphia, Louvain detectó sub-grupos que no dividían el territorio, sino los gustos: se formaron comunidades dedicadas únicamente a comida vegetariana, y otras especializadas en vida nocturna y cervecerías.</div>
+              <div class="card-desc">En metrópolis densas como Philadelphia, Louvain detectó sub-grupos que no dividían el territorio, sino los gustos: comunidades de comida vegetariana y otras de vida nocturna y cervecerías.</div>
+            </div>
+            <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:6px;">
+              <img src="subcomunidades_nicho.png" alt="Subcomunidades de Nicho" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
+
         </div>
       </div>
       <div class="slide-count">9 / 18</div>
@@ -1005,33 +1014,42 @@
         <p class="section-lead">Para agrupar los negocios de forma inteligente, no podíamos confiar en variables simples. Diseñamos un espacio multidimensional que fusiona categorías y comportamiento.</p>
       </div>
 
-      <div class="content-body">
-        <div class="grid-2">
-          <div class="col-text">
-            <ul class="feature-list">
-              <li class="feature-item">
-                <div class="f-icon">📐</div>
-                <div class="f-text">
-                  <h4>PCA (Atributos Explícitos)</h4>
-                  <p>Extraemos las 20 categorías más frecuentes y aplicamos PCA con un umbral de varianza del 90% para colapsar variables correlacionadas en componentes lineales principales.</p>
-                </div>
-              </li>
-              <li class="feature-item">
-                <div class="f-icon">🔑</div>
-                <div class="f-text">
-                  <h4>SVD (Comportamiento Latente)</h4>
-                  <p>Descomponemos la matriz de interacciones User-Item para extraer embeddings de negocio latentes, alineando el comportamiento implícito de los usuarios con las variables del PCA.</p>
-                </div>
-              </li>
-            </ul>
+      <div class="content-body" style="display:flex; flex-direction:column; gap:0.9rem; height:100%;">
+
+        <!-- Descripciones arriba en dos columnas -->
+        <div style="display:flex; gap:1.5rem; flex-shrink:0;">
+          <div style="flex:1; display:flex; align-items:flex-start; gap:0.7rem;">
+            <div class="f-icon" style="font-size:1.5rem; flex-shrink:0;">📐</div>
+            <div>
+              <h4 style="font-size:1rem; font-weight:700; color:var(--violet); margin-bottom:0.3rem;">PCA — Atributos Explícitos</h4>
+              <p style="font-size:0.88rem; color:var(--mid); line-height:1.55;">Extraemos las 20 categorías más frecuentes y aplicamos PCA con un umbral de varianza del 90% para colapsar variables correlacionadas en componentes lineales principales.</p>
+            </div>
           </div>
-          <div class="col-visual">
-            <div class="card e">
-              <div class="card-title">Cuatro Algoritmos desde Cero</div>
-              <div class="card-desc">Evaluamos y comparamos implementaciones nativas de <strong>K-Means++</strong>, <strong>DBSCAN</strong> (densidad), <strong>CURE</strong> (representantes no esféricos) y <strong>BFR</strong> (escalabilidad en bloques) para encontrar la mejor segmentación comercial.</div>
+          <div style="flex:1; display:flex; align-items:flex-start; gap:0.7rem;">
+            <div class="f-icon" style="font-size:1.5rem; flex-shrink:0;">🔑</div>
+            <div>
+              <h4 style="font-size:1rem; font-weight:700; color:var(--emerald); margin-bottom:0.3rem;">SVD — Comportamiento Latente</h4>
+              <p style="font-size:0.88rem; color:var(--mid); line-height:1.55;">Descomponemos la matriz User-Item para extraer embeddings de negocio latentes, alineando el comportamiento implícito de los usuarios con las variables del PCA.</p>
             </div>
           </div>
         </div>
+
+        <!-- Imágenes grandes abajo -->
+        <div style="display:flex; gap:1.5rem; flex:1; min-height:0;">
+          <div style="flex:1; display:flex; flex-direction:column; gap:0.35rem;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:.15em; color:var(--violet); text-transform:uppercase; font-weight:600; text-align:center;">PCA — Varianza Explicada</span>
+            <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:6px;">
+              <img src="pca.png" alt="PCA Varianza Explicada" style="max-width:100%; max-height:100%; object-fit:contain;">
+            </div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:0.35rem;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:.15em; color:var(--emerald); text-transform:uppercase; font-weight:600; text-align:center;">SVD — Reconstrucción</span>
+            <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:6px;">
+              <img src="svd_reconstruccion.png" alt="SVD Reconstrucción" style="max-width:100%; max-height:100%; object-fit:contain;">
+            </div>
+          </div>
+        </div>
+
       </div>
       <div class="slide-count">10 / 18</div>
     </div>
@@ -1090,19 +1108,40 @@
         <p class="section-lead">Las métricas matemáticas puras pueden engañar de forma crítica. CURE arrojó el mejor Coeficiente de Silueta, pero su segmentación resultó completamente inútil.</p>
       </div>
 
-      <div class="content-body">
-        <div class="grid-2">
-          <div class="col-visual">
-            <div class="macos-window" style="height:100%;">
+      <div class="content-body" style="display:flex; flex-direction:column; gap:0.8rem; height:100%;">
+
+        <!-- Textos arriba en dos columnas -->
+        <div style="display:flex; gap:1.5rem; flex-shrink:0;">
+          <div style="flex:1;">
+            <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 0.9rem 0 0 0;">
+              <div class="card-title">CURE y el "Efecto Cadena"</div>
+              <div class="card-desc">CURE agrupó al <strong>98.2% de los datos (1,444 de 1,470 negocios)</strong> en el Clúster 0. El <strong>Silhouette de 0.7689 es engañoso</strong>: se infla por la distancia a clústeres aislados. Partición sin valor estratégico.</div>
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div class="card c" style="background:transparent; border:none; border-top: 4px solid var(--coral); padding: 0.9rem 0 0 0;">
+              <div class="card-title">DBSCAN y la Fragmentación</div>
+              <div class="card-desc">DBSCAN descubrió <strong>118 micro-clústeres de nicho</strong> y aisló 23 negocios como ruido (1.5% outliers). Ideal para recomendaciones específicas (ej. Clúster 81: Pizza/Italiano), pero inmanejable para políticas globales.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal + imágenes en fila abajo -->
+        <div style="display:flex; gap:1.2rem; flex:1; min-height:0;">
+
+          <!-- Terminal métricas -->
+          <div style="flex:1; display:flex; flex-direction:column; gap:0.35rem;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:0.65rem; letter-spacing:.12em; color:var(--emerald); text-transform:uppercase; font-weight:600;">Métricas comparativas</span>
+            <div class="macos-window" style="flex:1;">
               <div class="macos-titlebar">
                 <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
                 <span class="window-title">terminal - clustering_metrics.sh</span>
               </div>
-              <div class="terminal-box">
+              <div class="terminal-box" style="height:calc(100% - 36px); font-size:0.82rem;">
 <span class="yellow">=== METRICAS COMPARATIVAS DE CLUSTERING ===</span>
 
-Algoritmo  | Silhouette | Clústeres | Outliers / Ruido
-------------------------------------------------------
+Algoritmo  | Silhouette | Clústeres | Outliers
+----------------------------------------------
 K-Means++  | <span class="blue">0.4244</span>     | 5         | 0.0%
 DBSCAN     | <span class="blue">0.4511</span>     | 118       | 1.5%
 CURE       | <span class="green">0.7689</span>     | 3         | 0.0%
@@ -1110,16 +1149,23 @@ BFR        | -0.4143    | 52        | 1.2%
               </div>
             </div>
           </div>
-          <div class="col-text">
-            <div class="card e" style="background:transparent; border:none; border-top: 4px solid var(--emerald); padding: 1.2rem 0;">
-              <div class="card-title">CURE y el "Efecto Cadena"</div>
-              <div class="card-desc">CURE agrupó al <strong>98.2% de los datos (1,444 de 1,470 negocios)</strong> en el Clúster 0, dejando el Clúster 1 (19) y Clúster 2 (7) como residuales. El <strong>Silhouette Score de 0.7689 es engañoso</strong>: se infla por la inmensa distancia a los clústeres aislados, pero la partición no aporta valor estratégico.</div>
-            </div>
-            <div class="card c" style="background:transparent; border:none; border-top: 4px solid var(--coral); padding: 1.2rem 0; margin-top: 0.5rem;">
-              <div class="card-title">DBSCAN y la Fragmentación</div>
-              <div class="card-desc">DBSCAN descubrió <strong>118 micro-clústeres de nicho</strong> y aisló 23 negocios como ruido (1.5% outliers). Aunque es ideal para recomendaciones muy específicas (ej. Clúster 81: Pizza/Italiano), es inmanejable para definir políticas globales de negocio.</div>
+
+          <!-- Imagen CURE vs DBSCAN -->
+          <div style="flex:1.4; display:flex; flex-direction:column; gap:0.35rem;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:0.65rem; letter-spacing:.12em; color:var(--emerald); text-transform:uppercase; font-weight:600;">CURE vs DBSCAN — Clustering</span>
+            <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.2); border-radius:12px; overflow:hidden; padding:6px;">
+              <img src="cure_dbscan_grafica.png" alt="CURE y DBSCAN" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
+
+          <!-- Imagen DBSCAN eps -->
+          <div style="flex:1.4; display:flex; flex-direction:column; gap:0.35rem;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:0.65rem; letter-spacing:.12em; color:var(--coral); text-transform:uppercase; font-weight:600;">DBSCAN ε-distance Plot</span>
+            <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.2); border-radius:12px; overflow:hidden; padding:6px;">
+              <img src="dbscan_eps.png" alt="DBSCAN eps" style="max-width:100%; max-height:100%; object-fit:contain;">
+            </div>
+          </div>
+
         </div>
       </div>
       <div class="slide-count">12 / 18</div>
@@ -1127,53 +1173,6 @@ BFR        | -0.4143    | 52        | 1.2%
   </section>
 
   <!-- ======================== PARTE 3 - SLIDE 13 ======================== -->
-  <section data-theme="light">
-    <div class="container slide-content">
-      <div class="header-block">
-        <p class="section-eyebrow" style="color:var(--violet)">03 — Clustering y Reducción de la dimensionalidad</p>
-        <h2 class="section-title">BFR: Limitaciones y Ruido en la Segmentación</h2>
-        <p class="section-lead">A pesar de su scalabilidad matemática para grandes volúmenes, la sensibilidad de BFR a la varianza y su suposición gaussiana le impiden generar una segmentación limpia para este dataset.</p>
-      </div>
-
-      <div class="content-body">
-        <div class="grid-2">
-          <div class="col-visual">
-            <div class="macos-window">
-              <div class="macos-titlebar">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title">bash - bfr_sets_status.sh</span>
-              </div>
-              <div class="terminal-box" style="font-size:0.8rem; padding:1.2rem;">
-<span class="yellow">=== ESTADO DE CONJUNTOS EN BFR (k=3) ===</span>
-* Discard Set (DS): Centros principales (Gaussianas)
-* Compression Set (CS): Mini-clústeres temporales
-* Retained Set (RS): Nodos aislados (Outliers)
-
-<span class="yellow">=== DISTANCIA DE MAHALANOBIS (Umbral 2.0) ===</span>
-d_m = sqrt( sum( ((x_i - centroid_j) ^ 2) / variance_j ) )
-
-<span class="green">Asignación dinámica a DS completada en bloques.</span>
-              </div>
-            </div>
-          </div>
-          <div class="col-text">
-            <div class="card c" style="border-top-color: var(--coral);">
-              <div class="card-title">Descartado para Estrategia (Silueta Negativa)</div>
-              <div class="card-desc">Aunque BFR es escalable en teoría, sufre ante la alta dispersión del dataset de Yelp:
-                <br><br>
-                1. <strong>Silueta Negativa (-0.4143):</strong> Indica un solapamiento severo entre clústeres.
-                <br>
-                2. <strong>Fragmentación:</strong> Genera 52 clústeres debido a los CS/RS sub-clústeres. Esto fragmenta de forma artificial el mercado, haciendo inútil el análisis estratégico global frente a K-Means++.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="slide-count">13 / 18</div>
-    </div>
-  </section>
-
-  <!-- ======================== PARTE 3 - SLIDE 14 ======================== -->
   <section class="dark-section" data-theme="dark">
     <div class="container slide-content">
       <div class="header-block">
@@ -1202,6 +1201,27 @@ d_m = sqrt( sum( ((x_i - centroid_j) ^ 2) / variance_j ) )
           </div>
         </div>
       </div>
+      <div class="slide-count">13 / 18</div>
+    </div>
+  </section>
+
+  <!-- ======================== PARTE 3 - SLIDE 14 ======================== -->
+  <section data-theme="light">
+    <div class="container slide-content">
+      <div class="header-block">
+        <p class="section-eyebrow" style="color:var(--violet)">03 — Clustering y Reducción de la dimensionalidad</p>
+        <h2 class="section-title">La Técnica Ganadora: K-Means++ (Optimización de K)</h2>
+        <p class="section-lead">Determinamos el número óptimo de segmentos evaluando la inercia (Suma de Errores Cuadráticos) a través del Método del Codo, identificando K=5 como el punto de equilibrio estratégico.</p>
+      </div>
+
+      <div class="content-body" style="display:flex; flex-direction:column; gap:0.85rem; height:100%;">
+        <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:0.35rem;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:.15em; color:var(--violet); text-transform:uppercase; font-weight:600; text-align:center;">K-Means++ &mdash; Metodo del Codo (K optimo = 5)</span>
+          <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:8px;">
+            <img src="k-means_codo.png" alt="K-Means Codo" style="max-width:100%; max-height:100%; object-fit:contain;">
+          </div>
+        </div>
+      </div>
       <div class="slide-count">14 / 18</div>
     </div>
   </section>
@@ -1215,36 +1235,36 @@ d_m = sqrt( sum( ((x_i - centroid_j) ^ 2) / variance_j ) )
         <p class="section-lead">K-Means++ ($K=5$) se corona como la mejor técnica para este dataset: es el único algoritmo que ofrece una segmentación macro balanceada, estable (silueta de 0.4244) y directamente aplicable al negocio.</p>
       </div>
 
-      <div class="content-body">
-        <div class="grid-3">
+      <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; gap:2rem; height:100%;">
+        <div class="grid-3" style="flex-shrink:0;">
           <div class="card e">
-            <div class="card-title">🥗 Clúster 0: Healthy & Veg</div>
+            <div class="card-title">&#x1F957; Cluster 0: Healthy &amp; Veg</div>
             <div class="card-desc">
               <strong>Negocios: 86</strong><br>
-              * Calificación: 4.05 estrellas<br>
-              * Reseñas promedio: 756.1<br>
-              * Categoría: 100% Vegetarian/Vegan.<br>
-              Representa el sector premium enfocado en salud y sostenibilidad.
+              &#9733; Calificacion: 4.05 estrellas<br>
+              &#9733; Resenas promedio: 756.1<br>
+              &#9733; 100% Vegetarian/Vegan.<br>
+              Sector premium de salud y sostenibilidad.
             </div>
           </div>
           <div class="card b">
-            <div class="card-title">🍔 Clúster 1: Mainstream Dining</div>
+            <div class="card-title">&#x1F354; Cluster 1: Mainstream Dining</div>
             <div class="card-desc">
               <strong>Negocios: 1,035 (70% total)</strong><br>
-              * Calificación: 3.98 estrellas<br>
-              * Reseñas promedio: 800.2<br>
-              * Categorías: Restaurants, Nightlife, Bars.<br>
-              El núcleo masivo gastronómico y de vida nocturna de la red.
+              &#9733; Calificacion: 3.98 estrellas<br>
+              &#9733; Resenas promedio: 800.2<br>
+              &#9733; Restaurants, Nightlife, Bars.<br>
+              Nucleo masivo gastronomico de la red.
             </div>
           </div>
           <div class="card c">
-            <div class="card-title">🥪 Clúster 3: Popular Lunch</div>
+            <div class="card-title">&#x1F96A; Cluster 3: Popular Lunch</div>
             <div class="card-desc">
               <strong>Negocios: 146</strong><br>
-              * Calificación: 4.06 estrellas<br>
-              * Reseñas promedio: 1,011.9<br>
-              * Categorías: 100% Sandwiches, Restaurants.<br>
-              Establecimientos rápidos con la mayor tracción de clientes.
+              &#9733; Calificacion: 4.06 estrellas<br>
+              &#9733; Resenas promedio: 1,011.9<br>
+              &#9733; 100% Sandwiches, Restaurants.<br>
+              Mayor traccion de clientes por local.
             </div>
           </div>
         </div>
