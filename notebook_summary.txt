@@ -1,0 +1,1226 @@
+
+================================================================================
+Analizando: Parte_I_Preprocessing.ipynb
+================================================================================
+
+[MARKDOWN]:
+## Construcción de grafo usuario-producto. Calcular densidad, diámetro inicial. 
+
+[MARKDOWN]:
+## 1. Importaciones
+
+[MARKDOWN]:
+## 2. Análisis Exploratorio de Datos (EDA) y Limpieza
+A continuación se definen las rutas de los archivos originales y se ejecuta el proceso de limpieza y análisis exploratorio general (usando una muestra representativa de reseñas obtenida por Reservoir Sampling para los gráficos iniciales).
+
+[OUTPUT TEXT]:
+1. Cargando datos de negocios de forma eficiente...
+
+
+[OUTPUT TEXT]:
+Cargando negocios: 150346it [00:00, 184297.79it/s]
+
+
+[OUTPUT TEXT]:
+   Negocios leídos originalmente: 150,346
+
+2. Cargando muestra de reseñas mediante Reservoir Sampling...
+
+
+[OUTPUT TEXT]:
+Reservoir Sampling de reseñas: 6990280it [00:10, 661296.58it/s]
+
+
+[OUTPUT TEXT]:
+   Reseñas leídas originalmente (temporal): 299,675
+
+3. Ejecutando limpieza exhaustiva y normalización...
+
+=== REPORTE DE LIMPIEZA Y NORMALIZACIÓN ===
+• Reseñas iniciales: 299,675
+  - Reseñas eliminadas por NaN críticos: 0
+  - Reseñas duplicadas eliminadas: 214
+  - Reseñas con estrellas inválidas eliminadas: 0
+  - Reseñas huérfanas eliminadas (sin negocio asociado): 0
+• Reseñas finales tras limpieza: 299,461
+--------------------------------------------------
+• Negocios iniciales: 150,346
+  - Neg...
+
+[OUTPUT RESULT]:
+  state  count  mean_stars  median_stars  mean_review_count
+0    PA  34039    3.573019           3.5          45.265431
+1    FL  26330    3.610957           4.0          42.534220
+2    TN  12056    3.571500           3.5          49.618033
+3    IN  11247    3.588246           4.0          42.016982
+4    MO  10913    3.546092           3.5          44.341336
+
+[OUTPUT TEXT]:
+
+6. Generando y guardando gráficos exploratorios del EDA...
+
+Distribución de calificaciones (Stars):
+
+
+[OUTPUT RESULT]:
+<IPython.core.display.Image object>
+
+[OUTPUT TEXT]:
+
+Distribución del volumen de reseñas por negocio:
+
+
+[OUTPUT RESULT]:
+<IPython.core.display.Image object>
+
+[OUTPUT TEXT]:
+
+Top 15 categorías de negocio más populares:
+
+
+[OUTPUT RESULT]:
+<IPython.core.display.Image object>
+
+[OUTPUT TEXT]:
+
+Relación entre Calificaciones y Volumen de Reseñas:
+
+
+[OUTPUT RESULT]:
+<IPython.core.display.Image object>
+
+[OUTPUT TEXT]:
+
+Análisis Geográfico por Segmentos (Top 5 Estados):
+
+
+[OUTPUT RESULT]:
+<IPython.core.display.Image object>
+
+[OUTPUT TEXT]:
+Iniciando exportación de datos para la presentación web...
+¡Exportación exitosa! Datos guardados en: p2/presentation_data.js
+
+
+[MARKDOWN]:
+### 2.1 Análisis de Retención y el Problema del "Cold Start" (Calculado sobre TODO el dataset)
+
+Para justificar la elección del filtro 10-core y evaluar la retención de datos, analizaremos la distribución de reseñas iterando sobre la totalidad del dataset original (los millones de reseñas).
+
+Como el dataset pesa varios GB, en lugar de cargarlo todo en un DataFrame de pandas de golpe, iteraremos el archivo línea por línea contando el grado de los nodos. De esta forma, calcularemos las curvas de r...
+
+[OUTPUT TEXT]:
+Calculando frecuencias sobre todo el dataset original...
+
+
+[OUTPUT TEXT]:
+Procesando reseñas crudas: 6990280it [00:25, 278193.64it/s]
+
+
+[OUTPUT TEXT]:
+
+Dataset completo: 1,987,929 usuarios, 150,346 negocios, 6,990,280 reseñas.
+
+
+[OUTPUT RESULT]:
+<Figure size 1000x600 with 1 Axes>
+
+[OUTPUT TEXT]:
+=== CÁLCULO DE CODO K-CORE ===
+• Codo óptimo calculado matemáticamente (Dataset Completo): k = 4
+• Reseñas (conexiones) retenidas en k=4: 67.94%
+--------------------------------------------------
+CONCLUSIÓN:
+Aunque la matemática rigurosa nos dicte que con k bajo optimizamos la retención frente al ruido, 
+en trabajos previos de minería de grafos avanzados (y como implementamos en la Parte II) 
+se exige una red mucho más densa. Por ello justificamos usar k=10.
+
+
+[OUTPUT TEXT]:
+Iniciando exportación de datos del codo k-core...
+¡Datos del codo exportados con éxito a p2/elbow_data.js!
+
+
+[MARKDOWN]:
+## 3. Construcción del Grafo Bipartito (10-Core)
+Basado en el análisis de retención, construimos el grafo utilizando el dataset filtrado con k-core=10 (como se utiliza en la Parte II) para garantizar un grafo denso y computable.
+
+[OUTPUT TEXT]:
+Cargando reviews de Yelp (Subgrafo 10-Core completo)...
+
+
+[OUTPUT TEXT]:
+Carga secuencial de reseñas: 800001it [00:01, 664408.32it/s]
+
+
+[OUTPUT TEXT]:
+Construyendo el grafo bipartito...
+Grafo bipartito no dirigido g listo con 81398 usuarios/negocios.
+Grafo bipartito dirigido g_directed listo con 81398 usuarios/negocios.
+
+
+[MARKDOWN]:
+## 4. Cálculo de Métricas y Componentes Conexas
+
+
+[OUTPUT TEXT]:
+=== MÉTRICAS DEL GRAFO USUARIO-PRODUCTO ===
+• Nodos Totales: 81,398
+  - Usuarios: 28,313
+  - Negocios: 53,085
+• Aristas: 759,098
+• Densidad Estándar: 0.00022914
+• Densidad Bipartita: 0.00050506
+
+Calculando componentes conexas...
+Componentes encontradas: 1
+Tamaño de la Componente Gigante (Gcc): 81,398 nodos (100.00% del grafo)
+Tiempo de componentes: 0.27 s
+
+
+[OUTPUT TEXT]:
+Calculando diámetro aproximado de Gcc...
+Diámetro estimado: 10
+Tiempo de cálculo de diámetro: 5.48 s
+
+
+================================================================================
+Analizando: Parte_II_Graphs.ipynb
+================================================================================
+
+[MARKDOWN]:
+# Parte II: Algoritmos de Análisis de Enlaces, Ranking y Comunidades
+
+Este notebook corre de forma autónoma la Parte II del proyecto.
+
+
+[OUTPUT TEXT]:
+Cargando reviews de Yelp (Subgrafo 10-Core completo)...
+
+
+[OUTPUT TEXT]:
+Carga secuencial de reseñas: 800001it [00:01, 666012.33it/s]
+
+
+[OUTPUT TEXT]:
+Construyendo el grafo bipartito...
+Grafo bipartito no dirigido g listo con 81398 usuarios/negocios.
+Grafo bipartito dirigido g_directed listo con 81398 usuarios/negocios.
+
+
+[MARKDOWN]:
+# Parte II: Algoritmos de Análisis de Enlaces, Ranking y Comunidades
+
+En esta sección implementamos y evaluamos en vivo los algoritmos sobre el grafo bipartito `g` construido previamente:
+1. **PageRank iterativo** para identificar nodos influyentes.
+2. **HITS (Hubs and Authorities)** para caracterizar la co-alineación de usuarios activos (*hubs*) y negocios populares (*authorities*).
+3. **Algoritmo de Louvain** para maximizar la modularidad y agrupar el grafo bipartito en comunidades cohesivas.
+...
+
+[MARKDOWN]:
+## Carga de Negocios para Mapeo
+Antes de correr los rankings, cargamos los metadatos de negocios de Yelp para poder asociar los identificadores a sus nombres y ciudades correspondientes.
+
+[OUTPUT TEXT]:
+Cargando metadatos de negocios...
+
+
+[OUTPUT TEXT]:
+Cargando negocios: 150346it [00:00, 191516.51it/s]
+
+
+[OUTPUT TEXT]:
+Mapeo cargado exitosamente para 150346 negocios.
+
+
+[MARKDOWN]:
+## PageRank e HITS
+Ejecutamos en vivo los algoritmos core que implementamos en `graphs.py` directamente sobre el grafo `g` en memoria.
+
+[OUTPUT TEXT]:
+Ejecutando PageRank iterativo...
+PageRank calculado en 3.10 segundos.
+
+Ejecutando HITS (Hubs and Authorities)...
+HITS calculado en 52.80 segundos.
+
+
+[MARKDOWN]:
+### Visualización de los Top 10
+Utilizamos las utilidades de `run_analysis` para dar formato de tabla a los rankings obtenidos.
+
+[OUTPUT TEXT]:
+=== TOP 10 INFLUYENTES (PAGERANK) ===
+
+
+[OUTPUT RESULT]:
+                    node_id     type     score  \
+0  P_ytynqOUb3hjKeJfRj5Tshw  Negocio  0.000295   
+1  P__ab50qdWOk0DdB6XOrBitw  Negocio  0.000252   
+2  P_GXFMD0Z4jEVZBCsbPf4CTQ  Negocio  0.000207   
+3  P__C7QiQQc47AOEv4PE3Kong  Negocio  0.000193   
+4  P_iSRTaT9WngzB8JJ2YKJUig  Negocio  0.000187   
+5  P_L5LLN0RafiV1Z9cddzvuCw  Negocio  0.000177   
+6  P_GBTPC53ZrG1ZBY3DT8Mbcw  Negocio  0.000175   
+7  P_ac1AeYqs8Z4_e2X5M3if2A  Negocio  0.000173   
+8  P_PP3BBaVxZLcJU54uP_wL6Q  Negocio  0.000173   
+...
+
+[OUTPUT TEXT]:
+=== TOP 10 AUTHORITIES (HITS) ===
+
+
+[OUTPUT RESULT]:
+                    node_id     type     score                     name  \
+0  P_ytynqOUb3hjKeJfRj5Tshw  Negocio  0.162895  Reading Terminal Market   
+1  P_9PZxjhTIU7OgPIzuGi89Ew  Negocio  0.134808                   El Vez   
+2  P_ctHjyadbDQAtUFfkcAFEHw  Negocio  0.131701                    Zahav   
+3  P_6ajnOk0GcY9xbb5Ocaw8Gw  Negocio  0.127561                 Barbuzzo   
+4  P_j-qtdD55OLfSqfsWuQTDJg  Negocio  0.122887                     Parc   
+5  P_8pqdJjefYq-a9IBSJJmKwA  Negocio  0.105054    ...
+
+[OUTPUT TEXT]:
+
+=== TOP 10 HUBS (HITS) ===
+
+
+[OUTPUT RESULT]:
+                    node_id     type     score
+0  U_WO6L5yMX5LEeJuMNMjerRQ  Usuario  0.146658
+1  U_61FNJUiDqXReViksOYiILQ  Usuario  0.118683
+2  U_GcdYgbaF75vj7RO6EZhPOQ  Usuario  0.116368
+3  U_WJVedIAJN0FRxDn6M1tLkA  Usuario  0.116102
+4  U_hQjN1FuYaB4pQACZwfrclw  Usuario  0.112966
+5  U_Am_G2m0pwVrEg9AoUp5tow  Usuario  0.106311
+6  U_x6erNzhuM_c7xW6PlqClIQ  Usuario  0.102094
+7  U_WuiEYopWZOWOuWQD87fVSw  Usuario  0.101533
+8  U_HxyLRaoH9PS09M6R3rV-EQ  Usuario  0.099210
+9  U_aGI_wfhcJ86DJ-67Lkty8g  U...
+
+[MARKDOWN]:
+### Comparación e Interpretación de Rankings
+Evaluamos cuantitativamente la correlación de Spearman y el solapamiento del Top 50.
+
+[OUTPUT TEXT]:
+Correlación de Spearman en Negocios (PageRank vs Authority): 0.463508
+Solapamiento en el Top 50 Negocios: 34.0%
+Correlación de Spearman en Usuarios (PageRank vs Hub): 0.006424
+Solapamiento en el Top 50 Usuarios: 0.0%
+
+
+[MARKDOWN]:
+#### Análisis de Resultados:
+1. **Negocios (Correlación ~0.34, Solapamiento: 16%):** **PageRank** mide la visibilidad a largo plazo de un negocio de manera difusa, amortiguando la concentración por el término de teleportación ($1-d$). **HITS Authority** está fuertemente acoplada a la calidad de los Hubs; un negocio es Authority únicamente si es reseñado por usuarios con alto Hub score. Un negocio con muchas reseñas de usuarios casuales tendrá un PageRank alto pero una HITS Authority moderada.
+2....
+
+[MARKDOWN]:
+## Detección de Comunidades (Louvain)
+Ejecutamos en vivo nuestro algoritmo de Louvain completo para maximizar la modularidad sobre el grafo `g` en memoria.
+
+[OUTPUT TEXT]:
+Ejecutando algoritmo de Louvain...
+Louvain completado en 7.78 segundos.
+
+Modularidad Final Q: 0.779309
+Total de comunidades detectadas: 280
+
+
+[MARKDOWN]:
+### Caracterización de Comunidades
+Importamos la función de caracterización del módulo `run_analysis` para analizar las 5 comunidades más grandes del grafo.
+
+[OUTPUT TEXT]:
+
+=========================================================================
+COMUNIDAD 1 (ID: 197)
+
+ * Tamaño total: 23668 nodos (Usuarios: 8219, Negocios: 15449)
+ * Conectividad interna: 220516 aristas | Conectividad externa: 17228 aristas
+ * Densidad bipartita interna: 1.736684e-03
+ * Ciudades principales: Philadelphia (6662), Wilmington (399), Cherry Hill (360)
+ * Categorías principales: Restaurants (10122), Food (4409), Nightlife (2195), Bars (2050), Sandwiches (1707)
+
+ * Nodos Negocios Clave ...
+
+[OUTPUT RESULT]:
+                    node_id                     name          city  \
+0  P_ytynqOUb3hjKeJfRj5Tshw  Reading Terminal Market  Philadelphia   
+1  P_9PZxjhTIU7OgPIzuGi89Ew                   El Vez  Philadelphia   
+2  P_ctHjyadbDQAtUFfkcAFEHw                    Zahav  Philadelphia   
+
+   internal_degree  global_degree  
+0              689            827  
+1              482            518  
+2              474            506  
+
+[OUTPUT TEXT]:
+
+ * Nodos Usuarios Clave (Grado Interno):
+
+
+[OUTPUT RESULT]:
+                    node_id  internal_degree  global_degree
+0  U_ppsm8EDKjA1fp1yTCP3RrQ              737            748
+1  U_GcdYgbaF75vj7RO6EZhPOQ              604            663
+2  U_WO6L5yMX5LEeJuMNMjerRQ              575            575
+
+[OUTPUT TEXT]:
+
+=========================================================================
+COMUNIDAD 2 (ID: 215)
+
+ * Tamaño total: 13598 nodos (Usuarios: 4656, Negocios: 8942)
+ * Conectividad interna: 123319 aristas | Conectividad externa: 12877 aristas
+ * Densidad bipartita interna: 2.961982e-03
+ * Ciudades principales: Tampa (3386), Clearwater (688), Saint Petersburg (580)
+ * Categorías principales: Restaurants (5650), Food (2666), Nightlife (1471), Bars (1406), American (Traditional) (1124)
+
+ * Nodos Negocio...
+
+[OUTPUT RESULT]:
+                    node_id                name   city  internal_degree  \
+0  P_QHWYlmVbLC3K6eglWoHVvA                Datz  Tampa              454   
+1  P_L5LLN0RafiV1Z9cddzvuCw               Ulele  Tampa              442   
+2  P_dsfRniRgfbDjC8os848B6A  Bern's Steak House  Tampa              324   
+
+   global_degree  
+0            496  
+1            469  
+2            379  
+
+[OUTPUT TEXT]:
+
+ * Nodos Usuarios Clave (Grado Interno):
+
+
+[OUTPUT RESULT]:
+                    node_id  internal_degree  global_degree
+0  U_fr1Hz2acAb3OaL3l6DyKNg             1180           1217
+1  U_Um5bfs5DH6eizgjH3xZsvg              969            994
+2  U_-kLVfaJytOJY2-QdQoCcNQ              755            794
+
+[OUTPUT TEXT]:
+
+=========================================================================
+COMUNIDAD 3 (ID: 160)
+
+ * Tamaño total: 7422 nodos (Usuarios: 3181, Negocios: 4241)
+ * Conectividad interna: 67531 aristas | Conectividad externa: 19523 aristas
+ * Densidad bipartita interna: 5.005774e-03
+ * Ciudades principales: New Orleans (2962), Metairie (605), Kenner (161)
+ * Categorías principales: Restaurants (2401), Food (1167), Nightlife (812), Bars (741), Shopping (450)
+
+ * Nodos Negocios Clave (Grado Interno):
+
+
+[OUTPUT RESULT]:
+                    node_id                name         city  internal_degree  \
+0  P__ab50qdWOk0DdB6XOrBitw   Acme Oyster House  New Orleans              370   
+1  P__C7QiQQc47AOEv4PE3Kong  Commander's Palace  New Orleans              338   
+2  P_GBTPC53ZrG1ZBY3DT8Mbcw                Luke  New Orleans              312   
+
+   global_degree  
+0            559  
+1            453  
+2            410  
+
+[OUTPUT TEXT]:
+
+ * Nodos Usuarios Clave (Grado Interno):
+
+
+[OUTPUT RESULT]:
+                    node_id  internal_degree  global_degree
+0  U_0Igx-a1wAstiBDerGxXk2A             1073           1099
+1  U_4YyJpeAr6jsY0FaIbLiTSQ              386            386
+2  U_riWDgbauId8TK7YFVgMNJw              382            384
+
+[OUTPUT TEXT]:
+
+=========================================================================
+COMUNIDAD 4 (ID: 272)
+
+ * Tamaño total: 6771 nodos (Usuarios: 2232, Negocios: 4539)
+ * Conectividad interna: 57471 aristas | Conectividad externa: 8786 aristas
+ * Densidad bipartita interna: 5.672760e-03
+ * Ciudades principales: Saint Louis (1911), St. Louis (502), St Louis (142)
+ * Categorías principales: Restaurants (3032), Food (1300), Nightlife (955), Bars (901), American (Traditional) (702)
+
+ * Nodos Negocios Clave (...
+
+[OUTPUT RESULT]:
+                    node_id                 name         city  \
+0  P_I_3LMZ_1m2mzR0oLIOePIg   Pappy's Smokehouse  Saint Louis   
+1  P_cQIh4YJlVtZI9TLF5_smOg      The Shaved Duck     St Louis   
+2  P_iRIHK8-EwpeffwvoO4nzIA  Broadway Oyster Bar     St Louis   
+
+   internal_degree  global_degree  
+0              261            368  
+1              196            227  
+2              173            224  
+
+[OUTPUT TEXT]:
+
+ * Nodos Usuarios Clave (Grado Interno):
+
+
+[OUTPUT RESULT]:
+                    node_id  internal_degree  global_degree
+0  U_PnwOegp7RXfMeNAyO9fQhQ              784            787
+1  U_60RKNAZwY5EUooJf624aKw              449            478
+2  U_C3Hpsx_eDfeSmxEc1HBzpA              448            466
+
+[OUTPUT TEXT]:
+
+=========================================================================
+COMUNIDAD 5 (ID: 198)
+
+ * Tamaño total: 6623 nodos (Usuarios: 2103, Negocios: 4520)
+ * Conectividad interna: 62667 aristas | Conectividad externa: 7259 aristas
+ * Densidad bipartita interna: 6.592668e-03
+ * Ciudades principales: Indianapolis (3158), Carmel (404), Fishers (231)
+ * Categorías principales: Restaurants (2719), Food (1295), Nightlife (751), Bars (697), American (Traditional) (623)
+
+ * Nodos Negocios Clave (Gra...
+
+[OUTPUT RESULT]:
+                    node_id                           name          city  \
+0  P_UFCN0bYdHroPKu6KV5CJqg                      The Eagle  Indianapolis   
+1  P_8yR12PNSMo6FBYx1u5KPlw  Bru Burger Bar - Indianapolis  Indianapolis   
+2  P_S_jfDqc2TUhkraTpeZgqjg                    Bakersfield  Indianapolis   
+
+   internal_degree  global_degree  
+0              285            311  
+1              265            286  
+2              250            267  
+
+[OUTPUT TEXT]:
+
+ * Nodos Usuarios Clave (Grado Interno):
+
+
+[OUTPUT RESULT]:
+                    node_id  internal_degree  global_degree
+0  U_2iS1vg5TYpV_iEiNC8osTg              754            812
+1  U_1JtpcHELRrSDoWS80WtzuQ              421            426
+2  U_0YI3p9o-ntRgRaPWpfa22Q              418            439
+
+[MARKDOWN]:
+### Interpretación de Comunidades
+- **Fuerza Geográfica:** Las comunidades representan límites físicos ( Saint Louis en la Comunidad 1, Reno/Sparks en la Comunidad 2, etc.), dado que los usuarios consumen casi exclusivamente de forma local.
+- **Preferencia Temática:** En metrópolis densas como Philadelphia, Louvain las subdivide en comunidades temáticas: la Comunidad 3 (turistas que visitan locales icónicos como Café Du Monde en New Orleans y Dim Sum Garden en Philadelphia), la Comunidad 4 (comi...
+
+[MARKDOWN]:
+### Visualización del Grafo de Comunidades
+Dado que el grafo 10-core tiene miles de nodos (lo cual generaría una bola de ruido visual incomprensible), extraemos un **subgrafo representativo**. 
+Seleccionamos las **5 comunidades más grandes** y, de cada una, extraemos los **50 nodos con mayor grado** (los hubs y authorities principales). Luego, usamos `networkx` exclusivamente como motor de dibujo (Spring Layout) para visualizar la separación espacial que nuestro algoritmo de Louvain logró.
+
+[OUTPUT RESULT]:
+<Figure size 1200x1200 with 1 Axes>
+
+[OUTPUT TEXT]:
+1. Cargando datos de negocios de forma eficiente...
+
+
+[OUTPUT TEXT]:
+Cargando negocios: 150346it [00:00, 188735.90it/s]
+
+
+[OUTPUT TEXT]:
+   Negocios leídos originalmente: 150,346
+
+2. Cargando muestra de reseñas mediante Reservoir Sampling...
+
+
+[OUTPUT TEXT]:
+Reservoir Sampling de reseñas: 6990280it [00:10, 679135.81it/s]
+
+
+[OUTPUT TEXT]:
+   Reseñas leídas originalmente (temporal): 299,675
+
+
+[OUTPUT TEXT]:
+Iniciando exportación del grafo para D3.js...
+Calculando PageRank para los tamaños de nodos...
+¡Grafo exportado con éxito a p2/graph_data.js!
+
+
+================================================================================
+Analizando: Parte_III_Clustering_VI_Reduction_Dimensionality.ipynb
+================================================================================
+
+[MARKDOWN]:
+# Parte III: Segmentación Estratégica con Clustering
+
+Este notebook corre de forma autónoma la Parte III del proyecto.
+
+
+[OUTPUT TEXT]:
+The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+
+
+[OUTPUT TEXT]:
+Cargando reviews de Yelp...
+Cargando negocios de Yelp...
+
+
+[MARKDOWN]:
+# Parte III: Segmentación Estratégica con Clustering
+Evaluamos diversos algoritmos nativos para determinar grupos cohesivos.
+
+[OUTPUT TEXT]:
+Construyendo matriz de características reales para Clustering...
+
+
+[MARKDOWN]:
+## Parte VI: Reducción de Dimensionalidad (PCA y SVD)
+Antes de aplicar los algoritmos de clustering, reduciremos la dimensionalidad de la matriz de características `X` para mitigar la 'maldición de la dimensionalidad' y eliminar el ruido. Usaremos nuestras implementaciones desde cero.
+
+[OUTPUT TEXT]:
+--- 1. Aplicando PCA sobre Características Densas Estandarizadas ---
+
+
+[OUTPUT RESULT]:
+<Figure size 1000x600 with 1 Axes>
+
+[OUTPUT RESULT]:
+<Figure size 1000x800 with 2 Axes>
+
+[OUTPUT TEXT]:
+Dimensiones originales: 22, Dimensiones PCA: 17
+Interpretación de los primeros 17 componentes principales:
+CP 1:
+  - Bars: 0.5552
+  - Nightlife: 0.5506
+  - Cocktail Bars: 0.3210
+
+CP 2:
+  - Food: -0.4546
+  - Coffee & Tea: -0.3862
+  - Breakfast & Brunch: -0.3758
+
+CP 3:
+  - Restaurants: 0.4919
+  - Arts & Entertainment: -0.4640
+  - Italian: 0.3566
+
+CP 4:
+  - Pizza: 0.4916
+  - Italian: 0.4842
+  - Seafood: -0.3493
+
+CP 5:
+  - Burgers: 0.4838
+  - Mexican: -0.4097
+  - American (Traditional): 0.3707
+
+CP 6...
+
+[OUTPUT RESULT]:
+<Figure size 1000x600 with 1 Axes>
+
+[OUTPUT TEXT]:
+Embeddings de items extraídos: shape (1500, 17)
+
+Matriz final enriquecida para clustering (PCA + SVD): (1500, 34)
+
+
+[OUTPUT RESULT]:
+<Figure size 640x480 with 1 Axes>
+
+[OUTPUT TEXT]:
+K-Means++ Silhouette: 0.0689
+
+
+[OUTPUT TEXT]:
+--- Características Dominantes por Cluster (K-Means++) ---
+
+Cluster 0:
+  - Estrellas promedio: -0.16
+  - Promedio Reviews (Norm): 0.3996
+  - Categorías dominantes:
+      * Seafood (Presencia: 247.8%)
+
+      * Restaurants (Presencia: 28.8%)
+
+      * Bars (Presencia: 15.9%)
+
+
+Cluster 1:
+  - Estrellas promedio: 0.34
+  - Promedio Reviews (Norm): 0.0192
+  - Categorías dominantes:
+      * Coffee & Tea (Presencia: 368.3%)
+
+      * Food (Presencia: 141.6%)
+
+      * Breakfast & Brunch (Presencia: 67.4%)
+...
+
+[OUTPUT RESULT]:
+<Figure size 640x480 with 1 Axes>
+
+[OUTPUT TEXT]:
+DBSCAN detectó 19 outliers/ruido.
+
+
+[OUTPUT TEXT]:
+--- Comparativa de Métricas ---
+CURE Silhouette: 0.4305, Purity: 0.7707, NMI: 0.0034
+BFR Silhouette: -0.1656, Purity: 0.7707, NMI: 0.0241
+
+
+[OUTPUT TEXT]:
+Buscando el K óptimo basado en Cohesión Topológica (Silhouette)...
+K     | CURE Silhouette    | BFR Silhouette    
+---------------------------------------------
+2     |          0.4297 |         -0.1712
+3     |          0.0201 |         -0.1823
+4     |          0.2016 |         -0.1654
+5     |          0.4189 |         -0.1854
+6     |          0.2476 |         -0.1447
+7     |          0.1348 |         -0.1629
+8     |          0.0399 |         -0.1378
+9     |          0.0793 |         -0.1911
+10 ...
+
+[OUTPUT RESULT]:
+<Figure size 1000x600 with 1 Axes>
+
+[OUTPUT TEXT]:
+---------------------------------------------
+El valor óptimo matemáticamente para CURE es k=2 con un score de 0.4297
+
+
+[OUTPUT RESULT]:
+<Figure size 1000x600 with 1 Axes>
+
+[OUTPUT TEXT]:
+
+==================================================
+   PERFILADO SEMÁNTICO - K-MEANS++
+==================================================
+
+--- Clúster 0 (Total negocios: 156) ---
+  * Calificación Promedio (Stars): 3.99
+  * Cantidad Promedio de Reseñas: 777.0
+  * Categorías Dominantes: Restaurants (144 / 92.3%), Event Planning & Services (77 / 49.4%), Nightlife (62 / 39.7%)
+
+--- Clúster 1 (Total negocios: 289) ---
+  * Calificación Promedio (Stars): 3.97
+  * Cantidad Promedio de Reseñas: 841.8
+  *...
+
+[MARKDOWN]:
+### Análisis de Complejidad: CURE vs K-Means++ y DBSCAN
+
+* **CURE (Clustering Using Representatives):** El enfoque jerárquico aglomerativo tradicional tiene una complejidad temporal de $O(N^2 \log N)$ y espacial de $O(N^2)$, lo cual es prohibitivo para grandes volúmenes de datos. Sin embargo, nuestra implementación mitiga esto seleccionando una muestra aleatoria (`sample_size`), reduciendo drásticamente la complejidad empírica a costa de una leve pérdida teórica en precisión. Espacialmente, solo...
+
+================================================================================
+Analizando: Parte_IV_Recommenders.ipynb
+================================================================================
+
+[MARKDOWN]:
+# Parte IV: Sistemas de Recomendación Híbridos
+
+Este notebook corre de forma autónoma la Parte IV del proyecto.
+
+
+[OUTPUT TEXT]:
+1. Cargando reviews (10-Core con Hashes originales)...
+2. Cargando catálogo de negocios...
+3. Generando mapeadores dinámicos unificados...
+¡Sincronización exitosa! Universo de negocios acoplado: 53085
+
+
+[MARKDOWN]:
+# Parte IV: Sistemas de Recomendación Híbridos
+Construir sistemas de recomendación escalables. Integrar múltiples enfoques para mejorar precisión y cobertura.
+
+[OUTPUT TEXT]:
+Construyendo matriz Usuario-Item dispersa (usando todo el sampleo)...
+Matriz Usuario-Item (Dispersa) creada: 28313 usuarios, 53085 items
+
+
+[MARKDOWN]:
+### 1. Extracción de Features (Content-Based) usando TF-IDF
+Se implementó una clase `TFIDF` propia que extrae los atributos (categorías de productos) de cada ítem y genera el vector ponderado en espacio de features.
+
+[OUTPUT TEXT]:
+Extrayendo Features de Contenido para TODOS los items en el sampleo...
+Matriz TF-IDF (Items x Features) creada con dimensiones: (53085, 4483)
+
+
+[MARKDOWN]:
+### 2. Filtrado Colaborativo (User-Based/ Item-Based)
+Se calcula la similitud Usuario-Usuario usando métricas como Coseno y Pearson. Luego se recomiendan ítems usando k-NN ponderado.
+
+[OUTPUT TEXT]:
+--- Inicializando Modelos de Filtrado Colaborativo ---
+user - user
+Recomendaciones CF (Coseno) para usuario 0: [8562, 20060, 1637, 11085, 13362]
+Recomendaciones CF (Pearson) para usuario 0: [3474, 8562, 11096, 9275, 1423]
+item - item
+Recomendaciones CF (Coseno) para usuario 0: [18662, 21789, 26526, 30588, 32744]
+Recomendaciones CF (Pearson) para usuario 0: [2754, 4075, 5596, 8674, 9225]
+
+
+[MARKDOWN]:
+### Análisis del Problema de "Cold-Start" (Arranque en Frío)
+
+El **Cold-Start** ocurre cuando ingresa un nuevo usuario o un nuevo producto al sistema, careciendo de interacciones históricas.
+1. **Usuarios Nuevos:** El *Filtrado Colaborativo Puro (CF)* fracasa por completo porque no puede encontrar vecinos similares al no tener calificaciones anteriores (la distancia coseno contra matrices llenas de ceros falla). Nuestro **Modelo Híbrido** mitiga esto porque, si no hay ratings, el CF devuelve cer...
+
+[MARKDOWN]:
+### 3. Filtrado basado en contenido (Content-Based)
+Se calcula la similitud entre el perfil del usuario (basado en las características de los ítems que ha calificado) y las características de los ítems nuevos usando la matriz `I_features` generada por TF-IDF. Se recomienda el top-N ítems con mayor similitud.
+
+[OUTPUT TEXT]:
+Entrenando recomendador basado en contenido...
+Perfil del usuario 15 creado basado en 11 ítems que le gustaron.
+Top 5 Recomendaciones Content-Based (Índices): [20818 15999 35415 30955 23134]
+1. wo6RAA4c8I5trN331y8SIw
+2. nnn78cplvQGZSMVblpI5gQ
+3. ABC7RM6MVsM1QMOX84UKiQ
+4. JvcLVPXUj8fOJ9yuLf8HjA
+5. mE16tq2q9kIAeI1wnPkKXQ
+
+
+[MARKDOWN]:
+### 4. Modelo Híbrido y Baselines
+Combinaremos las predicciones del modelo CF (User-Based) con las del modelo CBF mediante un promedio ponderado (*Weighted Average*). Utilizaremos un *Random Baseline* y un *Popularity Baseline* para su contrastación.
+
+[MARKDOWN]:
+### Evaluación 
+Se probarán los métodos en la extracción de las métricas **Precision@K**, **Recall@K**, **NDCG**, **RMSE** y **MAE**.
+
+[OUTPUT TEXT]:
+--- Evaluación Rigurosa de Modelos ---
+Resultados Promedio (usando Test Split):
+Modelo          | Prec@30  | Rec@30   | NDCG@30  | RMSE     | MAE      | Novelty  | Diversity
+----------------------------------------------------------------------------------------------------
+Híbrido         | 0.0040   | 0.0326   | 0.0182   | 1.2535   | 1.1740 | 9.8864   | 0.8185
+Popularidad     | 0.0040   | 0.0333   | 0.0168   | 0.8373   | 0.7671 | 6.0962   | 0.8520
+Random          | 0.0000   | 0.0000   | 0.0000 ...
+
+================================================================================
+Analizando: Parte_V.ipynb
+================================================================================
+
+[OUTPUT TEXT]:
+ Advertencia: se saltaron 1 líneas corruptas de 27541 en review_sample.json.
+Total de reseñas en el stream: 27,540
+Rango temporal: 2005-04-10 23:10:56 → 2022-01-19 18:57:45
+
+
+[OUTPUT RESULT]:
+                review_id             business_id                 user_id  \
+0  PQ1xH9CmH2mdGZqIJsPFPA  lS1dmSXpAtQqT04eRm9kiA  ZftKc54UnKJSbuzyEg4SjA   
+1  nS9L0OSxY5C8eXwBXRhEmA  6JaHpWSKuJgTQTmxHxPe3A  -qoyKSF2G3PkR_7XNoJfpQ   
+2  VTwxOYGVlG3TNx2gMuTbxg  3XirYkP9PJvVXIEDPNNXLA  3xX-Et9I4Bi4wdRPWJkAFg   
+3  XMJJS16B16EDdE1bcac_sg  -V0vIgo6196MDn_x3ZaYmA  NxcJCKeTLNVl-xRP7rpDhw   
+4  FyCIUGTG2rZ91Kd5WOT-dA  AfassS1QI0DHsqwuof9-lA  GitE04dW0jYxH5LplUTDBA   
+
+                 date  stars  useful ...
+
+[MARKDOWN]:
+---
+## 1. Ventanas Deslizantes (Sliding Windows) — Estadísticas y métricas
+
+**Objetivo:** dividir el stream de reseñas en ventanas de tiempo de tamaño fijo (1 hora, 4 horas, 1 día) y calcular, para cada ventana, las estadísticas requeridas (`count`, `sum`, `average`) más un panel extendido de **métricas por ventana** (volumen, calidad percibida, diversidad de negocios/usuarios activos).
+
+Conceptualmente, esto equivale a un procesador de streams que mantiene acumuladores (`count`, `sum`, `sum_sq`...
+
+[OUTPUT TEXT]:
+Ventanas de 1 hora — resumen estadístico:
+
+
+[OUTPUT RESULT]:
+           count        sum   average      std       min       max
+count  147068.00  147068.00  22678.00  4079.00  22678.00  22678.00
+mean        0.19       0.71      3.77     1.10      3.62      3.91
+std         0.48       1.92      1.38     0.97      1.50      1.40
+min         0.00       0.00      1.00     0.00      1.00      1.00
+25%         0.00       0.00      3.00     0.00      2.00      3.00
+50%         0.00       0.00      4.00     0.71      4.00      5.00
+75%         0.00       0.00    ...
+
+[OUTPUT TEXT]:
+
+Ventanas de 4 horas — resumen estadístico:
+
+
+[OUTPUT RESULT]:
+          count       sum   average      std       min       max
+count  36768.00  36768.00  14709.00  7083.00  14709.00  14709.00
+mean       0.75      2.82      3.75     1.17      3.23      4.19
+std        1.19      4.67      1.22     0.87      1.56      1.25
+min        0.00      0.00      1.00     0.00      1.00      1.00
+25%        0.00      0.00      3.00     0.58      2.00      4.00
+50%        0.00      0.00      4.00     1.15      4.00      5.00
+75%        1.00      5.00      5.00     1.91 ...
+
+[OUTPUT TEXT]:
+
+Ventanas de 1 día — resumen estadístico:
+
+
+[OUTPUT RESULT]:
+         count      sum  average      std      min      max
+count  6129.00  6129.00  4740.00  4103.00  4740.00  4740.00
+mean      4.49    16.95     3.75     1.33     2.13     4.72
+std       4.21    16.30     0.76     0.58     1.37     0.72
+min       0.00     0.00     1.00     0.00     1.00     1.00
+25%       1.00     3.00     3.33     0.97     1.00     5.00
+50%       4.00    13.00     3.86     1.42     1.00     5.00
+75%       7.00    27.00     4.23     1.73     3.00     5.00
+max      23.00    91...
+
+[OUTPUT TEXT]:
+/tmp/ipykernel_1970/146265646.py:43: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  bp = ax_box.boxplot(box_data, labels=list(ventanas.keys()), patch_artist=True,
+
+
+[OUTPUT RESULT]:
+<Figure size 1300x800 with 3 Axes>
+
+[OUTPUT RESULT]:
+         n_ventanas   mean    std  min  max  cv (%)
+ventana                                            
+1h            22678  3.768  1.384  1.0  5.0  36.717
+4h            14709  3.754  1.219  1.0  5.0  32.485
+1D             4740  3.754  0.759  1.0  5.0  20.205
+
+[OUTPUT TEXT]:
+/tmp/ipykernel_1970/146265646.py:43: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  bp = ax_box.boxplot(box_data, labels=list(ventanas.keys()), patch_artist=True,
+
+
+[OUTPUT RESULT]:
+<Figure size 1300x800 with 3 Axes>
+
+[OUTPUT RESULT]:
+         n_ventanas   mean    std  min  max   cv (%)
+ventana                                             
+1h           147068  0.187  0.480    0    6  256.504
+4h            36768  0.749  1.185    0   11  158.251
+1D             6129  4.493  4.210    0   23   93.694
+
+[OUTPUT TEXT]:
+Primeras ventanas de 1 día (count, sum, average, std, min, max de 'stars'):
+
+
+[OUTPUT RESULT]:
+            count  sum  average  std  min  max
+date                                          
+2005-04-10      1  4.0      4.0  NaN  4.0  4.0
+2005-04-11      0  0.0      NaN  NaN  NaN  NaN
+2005-04-12      0  0.0      NaN  NaN  NaN  NaN
+2005-04-13      0  0.0      NaN  NaN  NaN  NaN
+2005-04-14      0  0.0      NaN  NaN  NaN  NaN
+2005-04-15      0  0.0      NaN  NaN  NaN  NaN
+2005-04-16      0  0.0      NaN  NaN  NaN  NaN
+2005-04-17      0  0.0      NaN  NaN  NaN  NaN
+2005-04-18      0  0.0      Na...
+
+[MARKDOWN]:
+### 1.1 Panel de métricas por ventana (1 día)
+
+Además de `count/sum/average`, calculamos un panel más rico de métricas por ventana:
+
+- `n_reviews`: volumen (tendencia de popularidad)
+- `avg_stars`: calidad percibida promedio
+- `pct_useful`: fracción de reseñas marcadas como útiles
+- `avg_text_length`: longitud promedio del texto
+- `n_business_unicos` / `n_users_unicos`: diversidad de actores activos por ventana
+
+[OUTPUT RESULT]:
+            n_reviews  avg_stars  sum_useful  pct_useful  avg_text_length  \
+date                                                                        
+2005-04-10          1        4.0           0         0.0            567.0   
+2005-04-11          0        NaN           0         NaN              NaN   
+2005-04-12          0        NaN           0         NaN              NaN   
+2005-04-13          0        NaN           0         NaN              NaN   
+2005-04-14          0        NaN      ...
+
+[OUTPUT RESULT]:
+       n_reviews  avg_stars  sum_useful  pct_useful  avg_text_length  \
+count    6129.00    4740.00     6129.00     4740.00          4740.00   
+mean        4.49       3.75        5.15        0.49           602.22   
+std         4.21       0.76        7.22        0.29           315.86   
+min         0.00       1.00        0.00        0.00            29.00   
+25%         1.00       3.33        0.00        0.29           406.02   
+50%         4.00       3.86        3.00        0.50           533.07...
+
+[MARKDOWN]:
+### 1.2 Evolución temporal: volumen, calidad y diversidad (dashboard)
+
+Dashboard de 4 paneles que muestran la evolución día a día de todo el panel de métricas — equivalente a lo que vería un analista en un tablero de monitoreo en tiempo real.
+
+[OUTPUT RESULT]:
+<Figure size 1300x1200 with 4 Axes>
+
+[MARKDOWN]:
+La serie de `n_reviews` permite detectar de forma agregada (sin guardar reseña por reseña) el crecimiento sostenido del volumen y caídas abruptas (p.ej. asociadas a la pandemia, ya identificado en el EDA). La serie de `avg_stars` muestra si la satisfacción promedio presenta *drift* respecto al promedio global — relevante porque un sistema que asuma una distribución estática de `stars` podría quedar desactualizado. La diversidad de negocios/usuarios únicos por día indica si el crecimiento del vol...
+
+[MARKDOWN]:
+### 1.3 Promedio móvil (rolling) sobre la ventana de 1 día
+
+Para suavizar el ruido día a día y visualizar mejor la tendencia, aplicamos un **promedio móvil de 30 días** sobre `n_reviews` y `avg_stars` — esto simula una ventana deslizante que se recalcula de forma incremental conforme avanza el stream.
+
+[OUTPUT RESULT]:
+<Figure size 1300x700 with 2 Axes>
+
+[MARKDOWN]:
+### 1.4 Patrones horarios (ventanas de 1h)
+
+[OUTPUT RESULT]:
+<Figure size 1400x450 with 2 Axes>
+
+[OUTPUT RESULT]:
+      count     sum  average
+hour                        
+0      1836  6890.0     3.75
+1      1755  6533.0     3.72
+2      1635  6147.0     3.76
+3      1343  5044.0     3.76
+4       949  3501.0     3.69
+5       632  2348.0     3.72
+6       406  1460.0     3.60
+7       215   773.0     3.60
+8       158   561.0     3.55
+9       137   489.0     3.57
+10      140   517.0     3.69
+11      300  1137.0     3.79
+12      500  1905.0     3.81
+13      865  3283.0     3.80
+14     1181  4526.0     3.83
+15     ...
+
+[MARKDOWN]:
+### 1.5 Heatmap hora × día de la semana — patrones de actividad
+
+Combinamos `hour` y `dow` en un heatmap que revela patrones conjuntos (ej: actividad alta los viernes/sábados por la noche), algo que los análisis univariados de hora o día por separado no muestran.
+
+[OUTPUT RESULT]:
+<Figure size 1500x800 with 4 Axes>
+
+[MARKDOWN]:
+### 1.6 Ciclos estacionales (ventanas mensuales) y por año
+
+Para separar **estacionalidad intra-anual** (mes) de la **tendencia inter-anual** (año), mostramos ambas vistas.
+
+[OUTPUT RESULT]:
+<Figure size 1400x450 with 2 Axes>
+
+[OUTPUT RESULT]:
+<Figure size 1200x600 with 2 Axes>
+
+[MARKDOWN]:
+### 1.7 Densidad de la distribución de `stars` y `useful` por ventana
+
+Comparamos la **distribución (densidad)** de `average_stars` entre ventanas de 1h, 4h y 1 día — a menor tamaño de ventana, mayor varianza esperada (menos datos por ventana).
+
+[OUTPUT RESULT]:
+<Figure size 900x500 with 1 Axes>
+
+[MARKDOWN]:
+**Interpretación:** el gráfico de densidad conjunta permite ver si los días de **mayor volumen** tienden a tener calificaciones promedio distintas de los días de bajo volumen (por ejemplo, si días con pocas reseñas muestran promedios más extremos por efecto de tamaño de muestra pequeño — fenómeno típico de ventanas pequeñas en streaming).
+
+[MARKDOWN]:
+---
+## 2. Conteo Aproximado — Count-Min Sketch
+
+**Objetivo:** estimar la **frecuencia de reseñas por negocio** (`business_id`) procesando el stream un elemento a la vez, usando una matriz de contadores `C[k filas × w columnas]` y `k` funciones hash independientes (clase `CountMinSketch` en `streaming.py`), **sin** almacenar una tabla hash con un contador por cada `business_id` distinto.
+
+- **Inserción** de `x`: `C[i, h_i(x)] += 1` para `i = 1..k`
+- **Consulta** de `x`: `f̂(x) = min_i C[i, h_i(x)...
+
+[OUTPUT TEXT]:
+Elementos procesados (N): 27,540
+Memoria del sketch: 4 x 2000 = 8,000 contadores (62.5 KB)
+Cota de error teórica  f_hat(x) <= f(x) + eps*N : eps*N = 37.43
+Probabilidad de exceder la cota (delta = e^-k) : 0.0183
+
+
+[OUTPUT RESULT]:
+               business_id  conteo_real  estimacion_CMS  error_absoluto  \
+0   GBTPC53ZrG1ZBY3DT8Mbcw          158             161               3   
+1   SZU9c8V2GuREDN5KgyHFJw          117             126               9   
+2   vN6v8m4DO45Z4pp8yxxF_w          107             111               4   
+3   W4ZEKkva9HpAdZG88juwyQ          105             107               2   
+4   PY9GRfzr4nTZeINf346QOw           97              99               2   
+5   pSmOH4a3HNNpYM82J5ycLA           80           ...
+
+[OUTPUT TEXT]:
+
+¿Algún error negativo (subestimación)? -> False  (debe ser False)
+¿Todos dentro de la cota eps*N? -> True
+
+
+[MARKDOWN]:
+Notamos que todos los errores están por debajo de la cota de 50% y que ningún registro fue subestimado, lo que se reflejaría si hubiera error negativo.
+
+[MARKDOWN]:
+### 2.1 Evaluación global: conteo exacto vs CMS (scatter + distribución de error)
+
+[OUTPUT TEXT]:
+# negocios distintos: 7,830
+Error mínimo  : 0   (debe ser >= 0)
+Error promedio: 4.152
+Error máximo  : 33
+Cota teórica eps*N = 37.43
+% de elementos con error <= eps*N: 100.00%
+
+
+[OUTPUT RESULT]:
+<Figure size 1300x500 with 2 Axes>
+
+[MARKDOWN]:
+Todos los puntos del scatter caen sobre o por encima de la diagonal `y = x`, confirmando empíricamente que `f̂(x) ≥ f(x)` (nunca subestima). La distribución de error está concentrada cerca de 0 y muy por debajo de la cota teórica `ε·N`, mostrando que en la práctica el sketch es mucho más preciso de lo que garantiza el peor caso.
+
+[MARKDOWN]:
+### 2.2 Trade-off memoria vs error: efecto de `w`
+
+Repetimos el experimento variando `w` (número de columnas) para mostrar el trade-off entre memoria y precisión (`ε = e/w`).
+
+[OUTPUT RESULT]:
+      w  memoria_KB  error_promedio  error_maximo  cota_eps*N
+0    50       1.562         465.154           657    1497.230
+1   100       3.125         218.732           341     748.615
+2   500      15.625          31.563            91     149.723
+3  1000      31.250          12.342            51      74.861
+4  2000      62.500           4.152            33      37.431
+5  5000     156.250           0.705            15      14.972
+
+[OUTPUT RESULT]:
+<Figure size 1300x450 with 2 Axes>
+
+[MARKDOWN]:
+### 2.3 Trade-off adicional: efecto de `k` (número de hashes)
+
+Fijamos `w` y variamos `k` para observar el efecto del número de funciones hash sobre el error, complementando el análisis teórico de `δ = e^{-k}`.
+
+[OUTPUT RESULT]:
+   k  memoria_KB  error_promedio  error_maximo  delta_teorica
+0  1      3.9062         54.6664           214         0.3679
+1  2      7.8125         40.5335           155         0.1353
+2  3     11.7188         34.7843            99         0.0498
+3  4     15.6250         31.5628            91         0.0183
+4  6     23.4375         27.7070            74         0.0025
+5  8     31.2500         25.3418            63         0.0003
+
+[OUTPUT RESULT]:
+<Figure size 800x450 with 2 Axes>
+
+[MARKDOWN]:
+A mayor `w`, menor el error (`ε·N = (e/w)·N` decrece) a costa de más memoria. A mayor `k`, la probabilidad de exceder la cota (`δ = e^{-k}`) decrece exponencialmente, pero cada inserción/consulta cuesta `O(k)`. Esto evidencia el trade-off fundamental de los algoritmos de streaming aproximados: **memoria y tiempo acotados a cambio de un error controlado probabilísticamente**, en lugar de exactitud total con memoria proporcional a `|S|`.
+
+[MARKDOWN]:
+---
+## 3. Técnica adicional de Data Stream Mining: Algoritmo DGIM
+
+> Este bloque corresponde al **tercer requisito de la Parte V**: *"El equipo debe aplicar una técnica adicional de data stream mining, justificando su aporte en función de la evidencia obtenida a partir de los datos."* La técnica elegida es **DGIM** (Datar–Gionis–Indyk–Motwani), un algoritmo distinto tanto de las ventanas deslizantes (sección 1) como del Count-Min Sketch (sección 2).
+
+### 3.1 Justificación: ¿por qué DGIM y qué ap...
+
+[MARKDOWN]:
+### Aplicación al stream de reseñas: ¿cuántas de las últimas N reseñas fueron "útiles"?
+
+Procesamos el stream completo de reseñas (ordenado cronológicamente) bit a bit, donde `bit = 1` si `useful > 0`. Mantenemos DGIM con `N = 100,000` (ventana de las últimas 100 mil reseñas) y comparamos, en distintos puntos del stream, la estimación DGIM contra el conteo exacto (calculado con una ventana deslizante real sobre el array — solo posible aquí porque tenemos el dataset completo en memoria, no en un ...
+
+[OUTPUT TEXT]:
+Longitud total del stream: 27,540 bits
+Tamaño de ventana N      : 100,000
+Proporción global de '1's (useful>0): 44.34%
+
+
+[OUTPUT RESULT]:
+        t  estimacion_DGIM  conteo_real  error_pct  n_buckets  \
+71  24768           9190.0        11238      18.22         22   
+72  25112           9317.0        11365      18.02         19   
+73  25456           9448.0        11496      17.81         21   
+74  25800           9589.0        11637      17.60         21   
+75  26144           9727.0        11775      17.39         24   
+76  26488           9858.0        11906      17.20         22   
+77  26832           9966.0        12014      ...
+
+[MARKDOWN]:
+### 3.4 Evolución: estimación vs real, error y memoria (dashboard)
+
+[OUTPUT TEXT]:
+Error porcentual promedio: 18.12%
+Error porcentual máximo  : 24.82%  (cota teórica: < 50%)
+# buckets promedio mantenidos: 18.9
+Memoria aproximada usada (bits): ~470 bits
+Memoria que requeriría guardar los N=100,000 bits explícitamente: 100,000 bits
+Factor de ahorro de memoria: ~213x
+
+
+[OUTPUT RESULT]:
+<Figure size 1200x1000 with 3 Axes>
+
+[MARKDOWN]:
+### 3.5 Sensibilidad al tamaño de ventana N
+
+Repetimos el experimento con distintos tamaños de ventana `N` para mostrar cómo varía el error y el número de buckets (memoria) en función de `N` — a mayor `N`, más buckets potenciales (pero acotado por `O(log N)`).
+
+[OUTPUT RESULT]:
+       N  conteo_real_final  estimacion_final  error_pct  n_buckets_final  \
+0   1000                287             244.0      14.98               12   
+1  10000               3695            3508.0       5.06               19   
+
+   memoria_bits  memoria_exacta_bits  
+0        202.51                 1000  
+1        398.26                10000  
+
+[OUTPUT RESULT]:
+<Figure size 1300x450 with 2 Axes>
+
+[MARKDOWN]:
+### 3.6 Comparación con conteo exacto y discusión
+
+| Aspecto | Conteo Exacto (ventana real) | DGIM |
+|---|---|---|
+| Memoria | O(N) — guarda los N bits/eventos | O(log² N) |
+| Error | 0% | ≤ 50% (en la práctica, mucho menor — ver gráficos) |
+| Actualización | O(1) (push/pop de una cola) | O(1) amortizado (O(log N) peor caso, por la cascada de fusiones) |
+| Escala a N muy grande (ej. N=10⁹) | Inviable (≈120 MB por stream) | Viable: pocos KB por stream |
+
+Para una sola ventana y un solo atributo, ...
+
+[MARKDOWN]:
+---
+## 4. Técnica "plus": HyperLogLog — estimación de cardinalidad
+
+### 4.1 Justificación
+
+DGIM (sección 3) y Count-Min Sketch (sección 2) ya se habían visto en clase, así que sumamos una **cuarta técnica** de streaming, no cubierta por las anteriores, para reforzar el análisis: **HyperLogLog (HLL)**.
+
+Ninguna de las técnicas anteriores resuelve el problema de **cardinalidad**: *¿cuántos elementos distintos han pasado por el stream?* El Count-Min Sketch estima la frecuencia de un elemento puntua...
+
+[MARKDOWN]:
+**Lectura de la evidencia:** el error observado de HLL sobre `business_id` y `user_id` está muy por debajo de la cota teórica `1.04/√m`, igual que se vio con CMS y DGIM — un patrón consistente en las tres técnicas probabilísticas: el peor caso teórico es una garantía de seguridad, pero el comportamiento práctico es sensiblemente mejor. El ahorro de memoria frente a mantener el `set()` exacto de ids es de varios órdenes de magnitud, y esa brecha **crece linealmente con `D`** (cardinalidad real) m...
+
+[MARKDOWN]:
+### 4.2 Trade-off memoria vs error: efecto de `p` (número de registros `m = 2^p`)
+
+[MARKDOWN]:
+Igual que con `w` en Count-Min Sketch, aumentar `m` (más registros) reduce el error a costa de más memoria, pero incluso con `p` bajo (pocos registros, unos pocos bytes) el error se mantiene en un rango razonable — y con `p = 11` (2 KB) ya se logra un error observado de menos del 1% sobre decenas de miles de negocios distintos, frente a los ~50 bytes × D que costaría el conjunto exacto.
+
+[MARKDOWN]:
+---
+## 5. Conclusiones de la Parte V
+
+1. **Ventanas deslizantes** (1h, 4h, 1 día) permitieron caracterizar el comportamiento temporal del stream de reseñas de Yelp: tendencia de crecimiento general (con caída marcada durante la pandemia), patrones horarios y por día de la semana (incluyendo su interacción vía heatmap), estacionalidad mensual/anual, y un panel extendido de métricas (volumen, calidad, engagement, diversidad de actores) — todo manteniendo solo acumuladores por ventana, sin almacena...
+
+[MARKDOWN]:
+---
+## 6. Referencias bibliográficas
+
+1. Cormode, G., & Muthukrishnan, S. (2005). *An improved data stream summary: the count-min sketch and its applications*. Journal of Algorithms, 55(1), 58–75.
+2. Datar, M., Gionis, A., Indyk, P., & Motwani, R. (2002). *Maintaining stream statistics over sliding windows*. SIAM Journal on Computing, 31(6), 1794–1813.
+3. Muthukrishnan, S. (2005). *Data streams: Algorithms and applications*. Foundations and Trends in Theoretical Computer Science, 1(2), 117–236.
+...
