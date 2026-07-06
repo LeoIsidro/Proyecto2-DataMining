@@ -2,8 +2,7 @@
 
 > **Dataset:** Yelp Open Dataset · **Rango temporal:** 2005-04-10 → 2022-01-19 · **Idioma:** Python nativo (sin sklearn / networkx para algoritmos core)
 
-Este documento es el **Reporte Final** que consolida los hallazgos de todas las partes del proyecto, presentando los resultados obtenidos con sus métricas reales, decisiones de diseño algorítmico y el análisis crítico y ético exigido en la **Parte VII**.
-
+Este documento es el **Reporte Final** que consolida los hallazgos de todas las partes del proyecto, presentando los resultados obtenidos con sus métricas reales, decisiones de diseño algorítmico y el análisis crítico y ético.
 ---
 
 ## Parte I: Preprocesamiento y Análisis Exploratorio (EDA)

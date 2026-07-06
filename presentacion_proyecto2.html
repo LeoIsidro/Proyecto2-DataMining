@@ -265,6 +265,10 @@
   .dark-section .section-title { color: var(--ink); }
   .dark-section .section-lead { color: var(--mid); }
   .dark-section .section-eyebrow { color: var(--violet); }
+  .dark-section .stream-step-t { color: var(--ink); }
+  .dark-section .stream-step-t code { color: var(--violet); background: rgba(127,119,221,.08); }
+  .dark-section .sbit-0 { background: rgba(44,37,32,.06); color: rgba(44,37,32,.4); }
+
 
   /* CONTENT WRAPPER */
   .content-body { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
@@ -840,7 +844,7 @@
       </div>
 
       <div class="content-body" style="align-items: center; justify-content: center; display: flex;">
-        <img src="k_10_core.png" alt="Filtro 10-core" class="simple-image-border" style="max-width: 100%; max-height: 500px; width: auto; object-fit: contain;">
+        <img src="images/k_10_core.png" alt="Filtro 10-core" class="simple-image-border" style="max-width: 100%; max-height: 500px; width: auto; object-fit: contain;">
       </div>
       <div class="slide-count">6 / 18</div>
     </div>
@@ -985,7 +989,7 @@
               <div class="card-desc">Las comunidades principales se alínean directamente con ciudades específicas (Comunidad 0: Philadelphia, Comunidad 1: Saint Louis, Comunidad 2: Reno/Sparks). La proximidad física es la fuerza gravitacional principal de la red.</div>
             </div>
             <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:6px;">
-              <img src="fuerza_geografica.png" alt="Fuerza Geográfica" style="max-width:100%; max-height:100%; object-fit:contain;">
+              <img src="images/fuerza_geografica.png" alt="Fuerza Geográfica" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
 
@@ -995,7 +999,7 @@
               <div class="card-desc">En metrópolis densas como Philadelphia, Louvain detectó sub-grupos que no dividían el territorio, sino los gustos: comunidades de comida vegetariana y otras de vida nocturna y cervecerías.</div>
             </div>
             <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:6px;">
-              <img src="subcomunidades_nicho.png" alt="Subcomunidades de Nicho" style="max-width:100%; max-height:100%; object-fit:contain;">
+              <img src="images/subcomunidades_nicho.png" alt="Subcomunidades de Nicho" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
 
@@ -1039,13 +1043,13 @@
           <div style="flex:1; display:flex; flex-direction:column; gap:0.35rem;">
             <span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:.15em; color:var(--violet); text-transform:uppercase; font-weight:600; text-align:center;">PCA — Varianza Explicada</span>
             <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:6px;">
-              <img src="pca.png" alt="PCA Varianza Explicada" style="max-width:100%; max-height:100%; object-fit:contain;">
+              <img src="images/pca.png" alt="PCA Varianza Explicada" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
           <div style="flex:1; display:flex; flex-direction:column; gap:0.35rem;">
             <span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:.15em; color:var(--emerald); text-transform:uppercase; font-weight:600; text-align:center;">SVD — Reconstrucción</span>
             <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:6px;">
-              <img src="svd_reconstruccion.png" alt="SVD Reconstrucción" style="max-width:100%; max-height:100%; object-fit:contain;">
+              <img src="images/svd_reconstruccion.png" alt="SVD Reconstrucción" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
         </div>
@@ -1154,7 +1158,7 @@ BFR        | -0.4143    | 52        | 1.2%
           <div style="flex:1.4; display:flex; flex-direction:column; gap:0.35rem;">
             <span style="font-family:'JetBrains Mono',monospace; font-size:0.65rem; letter-spacing:.12em; color:var(--emerald); text-transform:uppercase; font-weight:600;">CURE vs DBSCAN — Clustering</span>
             <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.2); border-radius:12px; overflow:hidden; padding:6px;">
-              <img src="cure_dbscan_grafica.png" alt="CURE y DBSCAN" style="max-width:100%; max-height:100%; object-fit:contain;">
+              <img src="images/cure_dbscan_grafica.png" alt="CURE y DBSCAN" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
 
@@ -1162,7 +1166,7 @@ BFR        | -0.4143    | 52        | 1.2%
           <div style="flex:1.4; display:flex; flex-direction:column; gap:0.35rem;">
             <span style="font-family:'JetBrains Mono',monospace; font-size:0.65rem; letter-spacing:.12em; color:var(--coral); text-transform:uppercase; font-weight:600;">DBSCAN ε-distance Plot</span>
             <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.2); border-radius:12px; overflow:hidden; padding:6px;">
-              <img src="dbscan_eps.png" alt="DBSCAN eps" style="max-width:100%; max-height:100%; object-fit:contain;">
+              <img src="images/dbscan_eps.png" alt="DBSCAN eps" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
           </div>
 
@@ -1218,7 +1222,7 @@ BFR        | -0.4143    | 52        | 1.2%
         <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:0.35rem;">
           <span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:.15em; color:var(--violet); text-transform:uppercase; font-weight:600; text-align:center;">K-Means++ &mdash; Metodo del Codo (K optimo = 5)</span>
           <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; background:#fff; border:2px solid var(--grid); border-radius:14px; overflow:hidden; padding:8px;">
-            <img src="k-means_codo.png" alt="K-Means Codo" style="max-width:100%; max-height:100%; object-fit:contain;">
+            <img src="images/k-means_codo.png" alt="K-Means Codo" style="max-width:100%; max-height:100%; object-fit:contain;">
           </div>
         </div>
       </div>
@@ -1567,7 +1571,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
   </section>
 
   <!-- ======================== PARTE 5 - SLIDE 23: DGIM ======================== -->
-  <section class="dark-section" data-theme="dark" class="stream-section" style="overflow-y:auto;overflow-x:hidden;justify-content:flex-start;padding-top:80px;padding-bottom:2rem;">
+  <section class="dark-section stream-section" data-theme="dark" style="overflow-y:auto;overflow-x:hidden;justify-content:flex-start;padding-top:80px;padding-bottom:2rem;">
     <div class="container slide-content" style="height:auto;justify-content:flex-start;">
       <div class="header-block">
         <p class="section-eyebrow" style="color:var(--coral);">05 — Streams · Ventana Binaria Reciente</p>
@@ -1586,7 +1590,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;margin-bottom:1.2rem;">
         <div>
-          <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:600;margin-bottom:.8rem;">Operaciones</div>
+          <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:.8rem;">Operaciones</div>
           <div class="stream-step-row"><div class="stream-step-dot e">1</div><div class="stream-step-t">Bit=1 → crear bucket <code>(t, size=1)</code>. Bit=0 → no crear bucket.</div></div>
           <div class="stream-step-row"><div class="stream-step-dot c">2</div><div class="stream-step-t">Expirar buckets con <code>timestamp &lt; t − N</code>.</div></div>
           <div class="stream-step-row"><div class="stream-step-dot v">3</div><div class="stream-step-t">Si ≥ 3 buckets de tamaño <em>s</em> → fusionar los 2 más viejos en 1 de tamaño <code>2s</code>.</div></div>
@@ -1605,10 +1609,10 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
       </div>
 
       <div class="cx-row" style="margin-bottom:1.5rem;">
-        <div class="cx-pill" style="background:rgba(255,255,255,.04);"><span class="cx-pill-label">Memoria</span><span class="cx-pill-val c">O(log² N)</span><span class="cx-pill-sub">buckets activos</span></div>
-        <div class="cx-pill" style="background:rgba(255,255,255,.04);"><span class="cx-pill-label">Actualización</span><span class="cx-pill-val e">O(1) amort.</span><span class="cx-pill-sub">por bit recibido</span></div>
-        <div class="cx-pill" style="background:rgba(255,255,255,.04);"><span class="cx-pill-label">Error máximo</span><span class="cx-pill-val c">&lt; 50%</span><span class="cx-pill-sub">teórico</span></div>
-        <div class="cx-pill" style="background:rgba(255,255,255,.04);"><span class="cx-pill-label">Ahorro vs exacto</span><span class="cx-pill-val e">~300×</span><span class="cx-pill-sub">para N=100,000</span></div>
+        <div class="cx-pill"><span class="cx-pill-label">Memoria</span><span class="cx-pill-val c">O(log² N)</span><span class="cx-pill-sub">buckets activos</span></div>
+        <div class="cx-pill"><span class="cx-pill-label">Actualización</span><span class="cx-pill-val e">O(1) amort.</span><span class="cx-pill-sub">por bit recibido</span></div>
+        <div class="cx-pill"><span class="cx-pill-label">Error máximo</span><span class="cx-pill-val c">&lt; 50%</span><span class="cx-pill-sub">teórico</span></div>
+        <div class="cx-pill"><span class="cx-pill-label">Ahorro vs exacto</span><span class="cx-pill-val e">~300×</span><span class="cx-pill-sub">para N=100,000</span></div>
       </div>
 
       <!-- Visualizador DGIM interactivo -->
@@ -1636,7 +1640,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
           <div id="dgim-estimate" style="margin-top:.8rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgba(255,255,255,.65);">Estimación: —</div>
         </div>
       </div>
-      <div class="slide-count" style="color:rgba(255,255,255,.4);background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);">23 / 25</div>
+      <div class="slide-count">23 / 25</div>
     </div>
   </section>
 
@@ -1651,7 +1655,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
 
       <div style="margin-bottom:1.5rem;">
         <p class="section-eyebrow-coral" style="margin-bottom:.3rem;">Gráfico 12 — DGIM vs conteo exacto</p>
-        <p style="font-size:.82rem;color:rgba(255,255,255,.35);margin-bottom:.8rem;">Dashboard 3 paneles: estimación vs real · % error · # buckets activos a lo largo del stream.</p>
+        <p style="font-size:.82rem;color:var(--mid);margin-bottom:.8rem;">Dashboard 3 paneles: estimación vs real · % error · # buckets activos a lo largo del stream.</p>
         <div class="dark-graph-img"><img src="p2/p2/DGIM_1.png" alt="DGIM vs conteo exacto — distribución y evolución"></div>
       </div>
 
@@ -1677,11 +1681,11 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
 
       <p class="section-eyebrow" style="color:var(--coral);">Insights — DGIM</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.5rem;">
-        <div class="ins" style="background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.07);border-left-color:var(--coral);"><div class="ins-title">Error real ~2% vs cota 50%</div><div class="ins-desc">El peor caso teórico rara vez ocurre. Sobre Yelp, DGIM es muy preciso.</div></div>
-        <div class="ins e" style="background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.07);"><div class="ins-title">~300× ahorro de memoria</div><div class="ins-desc">Para N=100,000 bits: exacto usa 100 KB; DGIM usa ~330 bits.</div></div>
-        <div class="ins" style="background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.07);border-left-color:var(--violet);"><div class="ins-title">Escalabilidad por negocio</div><div class="ins-desc">k negocios con DGIM: O(k·log²N). Con exacto: O(k·N).</div></div>
+        <div class="ins c"><div class="ins-title">Error real ~2% vs cota 50%</div><div class="ins-desc">El peor caso teórico rara vez ocurre. Sobre Yelp, DGIM es muy preciso.</div></div>
+        <div class="ins e"><div class="ins-title">~300× ahorro de memoria</div><div class="ins-desc">Para N=100,000 bits: exacto usa 100 KB; DGIM usa ~330 bits.</div></div>
+        <div class="ins"><div class="ins-title">Escalabilidad por negocio</div><div class="ins-desc">k negocios con DGIM: O(k·log²N). Con exacto: O(k·N).</div></div>
       </div>
-      <div class="slide-count" style="color:rgba(255,255,255,.4);background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);">24 / 25</div>
+      <div class="slide-count">24 / 25</div>
     </div>
   </section>
 
@@ -1840,7 +1844,7 @@ Random      | 0.0000  | 0.0000 | 0.0000  | 1.9848 | 1.7911 | 11.7268 | 0.9150
     const sEl = document.getElementById('dgim-stream');
     if (!sEl) return;
     sEl.innerHTML = DS.stream.length === 0
-      ? '<span style="color:rgba(255,255,255,.15);font-size:.75rem;font-family:JetBrains Mono,monospace;">sin bits aún</span>'
+      ? '<span style="color:var(--mid);font-size:.75rem;font-family:JetBrains Mono,monospace;">sin bits aún</span>'
       : DS.stream.map((b,i) => `<div class="sbit ${i===0?'sbit-new':b?'sbit-1':'sbit-0'}">${b}</div>`).join('');
 
     const bEl = document.getElementById('dgim-buckets');
