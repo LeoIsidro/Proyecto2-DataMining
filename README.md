@@ -2,6 +2,7 @@
 
 Este proyecto aplica técnicas de **Minería de Datos en Grafos** para analizar las interacciones entre usuarios y negocios de Yelp. A través de la construcción de un grafo bipartito y la implementación de algoritmos matemáticos desde cero (sin depender de librerías externas de redes como `networkx`), identificamos los actores más influyentes y descubrimos comunidades unidas por geografía o afinidad de consumo.
 
+Reporte final en formato [Wiki](https://github.com/LeoIsidro/Proyecto2-DataMining/wiki)
 ## ¿De qué trata este proyecto?
 Yelp conecta a usuarios que escriben reseñas con los negocios locales que visitan. Esto forma de manera natural una red o **grafo bipartito** (donde los nodos son de dos tipos: Usuarios y Negocios, y las conexiones representan reseñas).
 Analizar esta red nos permite:
